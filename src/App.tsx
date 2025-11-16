@@ -11,6 +11,7 @@ import TypingPractice from "./pages/TypingPractice";
 import Stopwatch from "./pages/Stopwatch";
 import UnitConverter from "./pages/UnitConverter";
 import PasswordGenerator from "./pages/PasswordGenerator";
+import ChatGemini from "./pages/ChatGemini";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/stopwatch" element={<Stopwatch />} />
           <Route path="/unit-converter" element={<UnitConverter />} />
           <Route path="/password-generator" element={<PasswordGenerator />} />
+          <Route path="/chat-gemini" element={<ChatGemini />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

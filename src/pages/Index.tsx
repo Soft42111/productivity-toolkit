@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Calculator, ListTodo, Keyboard, Timer, Ruler, Key, Zap } from "lucide-react";
+import { Calculator, ListTodo, Keyboard, Timer, Ruler, Key, Zap, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
@@ -55,6 +55,13 @@ const Index = () => {
       icon: Key,
       path: "/password-generator",
       gradient: "from-primary via-accent to-primary",
+    },
+    {
+      title: "Chat with Gemini AI",
+      description: "Conversational AI chatbot powered by Google Gemini 2.5 Flash",
+      icon: Sparkles,
+      path: "/chat-gemini",
+      gradient: "from-accent to-primary",
     },
   ];
 
