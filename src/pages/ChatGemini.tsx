@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, ArrowLeft, Sparkles } from "lucide-react";
+import { Send, ArrowLeft, Sparkles, Copy, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ThemeToggle from "@/components/ThemeToggle";
 
 interface Message {
@@ -19,8 +21,15 @@ const ChatGemini = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  const copyToClipboard = async (code: string) => {
+    await navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -130,15 +139,44 @@ const ChatGemini = () => {
                           strong: ({ children }) => <strong className="font-bold">{children}</strong>,
                           em: ({ children }) => <em className="italic">{children}</em>,
                           code: ({ children, className }) => {
+                            const match = /language-(\w+)/.exec(className || "");
+                            const language = match ? match[1] : "";
+                            const code = String(children).replace(/\n$/, "");
                             const isInline = !className;
+                            
                             return isInline ? (
                               <code className="bg-background/50 px-1.5 py-0.5 rounded text-xs font-mono">
                                 {children}
                               </code>
                             ) : (
-                              <code className="block bg-background/50 px-3 py-2 rounded-lg text-xs font-mono overflow-x-auto my-2">
-                                {children}
-                              </code>
+                              <div className="relative group my-2">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="absolute right-2 top-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                                  onClick={() => copyToClipboard(code)}
+                                >
+                                  {copiedCode === code ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
+                                <div className="rounded-lg overflow-hidden [&>pre]:!m-0 [&>pre]:!bg-transparent [&>pre]:overflow-x-hidden [&>pre]:hover:overflow-x-auto [&>pre]:scrollbar-hide [&_code]:text-xs">
+                                  <SyntaxHighlighter
+                                    style={oneDark}
+                                    language={language}
+                                    PreTag="div"
+                                    customStyle={{
+                                      margin: 0,
+                                      borderRadius: "0.5rem",
+                                      padding: "1rem",
+                                    }}
+                                  >
+                                    {code}
+                                  </SyntaxHighlighter>
+                                </div>
+                              </div>
                             );
                           },
                         }}
