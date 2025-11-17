@@ -1,11 +1,45 @@
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Calculator, ListTodo, Keyboard, Timer, Ruler, Key, Zap, Sparkles } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import ThemeToggle from "@/components/ThemeToggle";
-import Footer from "@/components/Footer";
 import ShootingStars from "@/components/ShootingStars";
+import Footer from "@/components/Footer";
+import type { User } from '@supabase/supabase-js';
+import { 
+  Calculator, 
+  ListTodo, 
+  Keyboard, 
+  Timer, 
+  Ruler, 
+  Key,
+  Sparkles,
+  Zap,
+  LogOut,
+  LogIn
+} from "lucide-react";
 
 const Index = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+  };
+
   const tools = [
     {
       title: "Calculator",
@@ -16,7 +50,7 @@ const Index = () => {
     },
     {
       title: "Todo List",
-      description: "Organize tasks with search and localStorage persistence",
+      description: "Organize tasks with cloud sync and search",
       icon: ListTodo,
       path: "/todo",
       gradient: "from-accent to-primary",
@@ -69,8 +103,19 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col relative">
       <ShootingStars />
       <div className="max-w-6xl mx-auto px-6 py-12 flex-1 relative z-10">
-        <div className="flex justify-end mb-4 animate-fade-in">
+        <div className="flex justify-end items-center gap-4 mb-4 animate-fade-in">
           <ThemeToggle />
+          {user ? (
+            <Button variant="outline" onClick={handleSignOut} size="sm">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={() => navigate("/auth")} size="sm">
+              <LogIn className="h-4 w-4 mr-2" />
+              Sign In
+            </Button>
+          )}
         </div>
         
         <div className="text-center mb-12 animate-fade-in">
@@ -101,39 +146,15 @@ const Index = () => {
                 <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                   <tool.icon className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mb-3">
+                <h2 className="text-2xl font-bold text-foreground mb-3">
                   {tool.title}
-                </h3>
+                </h2>
                 <p className="text-muted-foreground leading-relaxed">
                   {tool.description}
                 </p>
-                <div className="mt-6 flex items-center text-primary font-semibold group-hover:translate-x-2 transition-transform">
-                  Open Tool
-                  <svg
-                    className="w-5 h-5 ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
               </Card>
             </Link>
           ))}
-        </div>
-
-        <div className="mt-16 text-center animate-fade-in">
-          <Card className="inline-block p-6 bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
-            <p className="text-sm text-muted-foreground">
-              More tools coming soon! Stay tuned for updates.
-            </p>
-          </Card>
         </div>
       </div>
       <Footer />
