@@ -12,6 +12,7 @@ import Stopwatch from "./pages/Stopwatch";
 import UnitConverter from "./pages/UnitConverter";
 import PasswordGenerator from "./pages/PasswordGenerator";
 import ChatGemini from "./pages/ChatGemini";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/unit-converter" element={<UnitConverter />} />
           <Route path="/password-generator" element={<PasswordGenerator />} />
           <Route path="/chat-gemini" element={<ChatGemini />} />
+          <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
