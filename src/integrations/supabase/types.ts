@@ -14,6 +14,62 @@ export type Database = {
   }
   public: {
     Tables: {
+      email_verifications: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      pinned_apps: {
+        Row: {
+          app_path: string
+          id: string
+          pinned_at: string
+          user_id: string
+        }
+        Insert: {
+          app_path: string
+          id?: string
+          pinned_at?: string
+          user_id: string
+        }
+        Update: {
+          app_path?: string
+          id?: string
+          pinned_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pinned_apps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -38,8 +94,41 @@ export type Database = {
         }
         Relationships: []
       }
+      todo_categories: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "todo_categories_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       todos: {
         Row: {
+          category_id: string | null
           completed: boolean
           created_at: string
           id: string
@@ -48,6 +137,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category_id?: string | null
           completed?: boolean
           created_at?: string
           id?: string
@@ -56,6 +146,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category_id?: string | null
           completed?: boolean
           created_at?: string
           id?: string
@@ -64,6 +155,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "todos_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "todo_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "todos_user_id_fkey"
             columns: ["user_id"]
