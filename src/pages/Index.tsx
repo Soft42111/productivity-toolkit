@@ -3,9 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import ThemeToggle from "@/components/ThemeToggle";
 import ShootingStars from "@/components/ShootingStars";
 import Footer from "@/components/Footer";
+import { useToast } from "@/hooks/use-toast";
 import type { User } from '@supabase/supabase-js';
 import { 
   Calculator, 
@@ -17,87 +19,121 @@ import {
   Sparkles,
   Zap,
   LogOut,
-  LogIn
+  LogIn,
+  Pin,
+  PinOff,
+  StickyNote,
+  DollarSign,
+  Clock,
+  Target,
+  FileText,
+  Palette,
+  Code,
+  QrCode,
+  Quote,
+  Dices,
+  Scale,
+  Cake,
+  FileType,
+  Bot,
+  UserCircle
 } from "lucide-react";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [pinnedApps, setPinnedApps] = useState<string[]>([]);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session) fetchPinnedApps();
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session) fetchPinnedApps();
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
+  const fetchPinnedApps = async () => {
+    const { data, error } = await supabase
+      .from("pinned_apps")
+      .select("app_path");
+    
+    if (!error && data) {
+      setPinnedApps(data.map(p => p.app_path));
+    }
+  };
+
+  const togglePin = async (path: string) => {
+    if (!user) {
+      toast({ title: "Sign in required", description: "Please sign in to pin apps", variant: "destructive" });
+      return;
+    }
+
+    const isPinned = pinnedApps.includes(path);
+
+    if (isPinned) {
+      const { error } = await supabase
+        .from("pinned_apps")
+        .delete()
+        .eq("app_path", path)
+        .eq("user_id", user.id);
+
+      if (!error) {
+        setPinnedApps(pinnedApps.filter(p => p !== path));
+        toast({ title: "Unpinned" });
+      }
+    } else {
+      const { error } = await supabase
+        .from("pinned_apps")
+        .insert([{ app_path: path, user_id: user.id }]);
+
+      if (!error) {
+        setPinnedApps([...pinnedApps, path]);
+        toast({ title: "Pinned to favorites" });
+      }
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
 
-  const tools = [
-    {
-      title: "Calculator",
-      description: "Scientific calculator with algebraic and trigonometric functions",
-      icon: Calculator,
-      path: "/calculator",
-      gradient: "from-primary to-accent",
-    },
-    {
-      title: "Todo List",
-      description: "Organize tasks with cloud sync and search",
-      icon: ListTodo,
-      path: "/todo",
-      gradient: "from-accent to-primary",
-    },
-    {
-      title: "Typing Speed Test",
-      description: "Test your typing speed with real-time WPM, accuracy, and error tracking",
-      icon: Keyboard,
-      path: "/typing-test",
-      gradient: "from-primary via-accent to-primary",
-    },
-    {
-      title: "Typing Practice",
-      description: "Practice your typing skills without the pressure of metrics",
-      icon: Zap,
-      path: "/typing-practice",
-      gradient: "from-accent via-primary to-accent",
-    },
-    {
-      title: "Stopwatch",
-      description: "Track time with lap functionality for precise measurements",
-      icon: Timer,
-      path: "/stopwatch",
-      gradient: "from-primary to-accent",
-    },
-    {
-      title: "Unit Converter",
-      description: "Convert between length, weight, temperature, and volume units",
-      icon: Ruler,
-      path: "/unit-converter",
-      gradient: "from-accent to-primary",
-    },
-    {
-      title: "Password Generator",
-      description: "Generate secure passwords with customizable strength options",
-      icon: Key,
-      path: "/password-generator",
-      gradient: "from-primary via-accent to-primary",
-    },
-    {
-      title: "Chat with Gemini AI",
-      description: "Conversational AI chatbot powered by Google Gemini 2.5 Flash",
-      icon: Sparkles,
-      path: "/chat-gemini",
-      gradient: "from-accent to-primary",
-    },
+  const allApps = [
+    { title: "Chat with Gemini", description: "AI-powered conversational assistant", icon: Bot, path: "/chat-gemini", gradient: "from-purple-500 to-pink-500", isBest: true },
+    { title: "Notes App", description: "Markdown-powered note taking", icon: StickyNote, path: "/notes", gradient: "from-yellow-500 to-orange-500", isBest: true },
+    { title: "Habit Tracker", description: "Build and track daily habits", icon: Target, path: "/habit-tracker", gradient: "from-green-500 to-teal-500", isBest: true },
+    { title: "Expense Tracker", description: "Track spending by category", icon: DollarSign, path: "/expenses", gradient: "from-blue-500 to-cyan-500", isBest: true },
+    { title: "Pomodoro Timer", description: "Focus with timed work sessions", icon: Clock, path: "/pomodoro", gradient: "from-red-500 to-pink-500", isBest: true },
+    { title: "Calculator", description: "Basic arithmetic calculator", icon: Calculator, path: "/calculator", gradient: "from-primary to-accent", isBest: false },
+    { title: "Todo List", description: "Task management with cloud sync", icon: ListTodo, path: "/todo", gradient: "from-accent to-primary", isBest: false },
+    { title: "Typing Test", description: "Test WPM and accuracy", icon: Keyboard, path: "/typing-test", gradient: "from-primary via-accent to-primary", isBest: false },
+    { title: "Typing Practice", description: "Improve typing skills", icon: Zap, path: "/typing-practice", gradient: "from-accent via-primary to-accent", isBest: false },
+    { title: "Stopwatch", description: "Time tracker with laps", icon: Timer, path: "/stopwatch", gradient: "from-primary to-accent", isBest: false },
+    { title: "Unit Converter", description: "Convert units instantly", icon: Ruler, path: "/unit-converter", gradient: "from-accent to-primary", isBest: false },
+    { title: "Password Generator", description: "Generate secure passwords", icon: Key, path: "/password-generator", gradient: "from-primary via-accent to-primary", isBest: false },
+    { title: "QR Code Generator", description: "Create QR codes instantly", icon: QrCode, path: "/qr-generator", gradient: "from-blue-500 to-purple-500", isBest: false },
+    { title: "Markdown Editor", description: "Real-time markdown preview", icon: FileText, path: "/markdown", gradient: "from-green-500 to-blue-500", isBest: false },
+    { title: "Color Picker", description: "Pick and convert colors", icon: Palette, path: "/color-picker", gradient: "from-pink-500 to-purple-500", isBest: false },
+    { title: "JSON Formatter", description: "Format and validate JSON", icon: Code, path: "/json-formatter", gradient: "from-orange-500 to-red-500", isBest: false },
+    { title: "Base64 Tool", description: "Encode/decode Base64", icon: FileType, path: "/base64", gradient: "from-cyan-500 to-blue-500", isBest: false },
+    { title: "Random Generator", description: "Generate random values", icon: Dices, path: "/random", gradient: "from-purple-500 to-pink-500", isBest: false },
+    { title: "BMI Calculator", description: "Calculate body mass index", icon: Scale, path: "/bmi", gradient: "from-green-500 to-teal-500", isBest: false },
+    { title: "Age Calculator", description: "Calculate exact age", icon: Cake, path: "/age-calculator", gradient: "from-pink-500 to-red-500", isBest: false },
+    { title: "Word Counter", description: "Count words and characters", icon: FileText, path: "/word-counter", gradient: "from-blue-500 to-indigo-500", isBest: false },
+    { title: "Quote Generator", description: "Generate random quotes", icon: Quote, path: "/quotes", gradient: "from-indigo-500 to-purple-500", isBest: false },
+    { title: "Countdown Timer", description: "Set countdown timers", icon: Timer, path: "/countdown", gradient: "from-orange-500 to-yellow-500", isBest: false },
+    { title: "User Profile", description: "Manage your profile", icon: UserCircle, path: "/profile", gradient: "from-gray-500 to-slate-500", isBest: false },
   ];
+
+  const bestApps = allApps.filter(app => app.isBest);
+  const pinnedAppsList = allApps.filter(app => pinnedApps.includes(app.path));
+  const otherApps = allApps.filter(app => !app.isBest);
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative">
@@ -126,35 +162,103 @@ const Index = () => {
               className="rounded-2xl shadow-[var(--shadow-hover)] max-w-3xl w-full border-2 border-primary/20 hover:scale-105 transition-transform duration-300"
             />
           </div>
-          <h1 className="text-5xl font-bold text-foreground mb-4">
-            Productivity <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Toolkit</span>
+          <h1 className="text-7xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+            Power Tools
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Your all-in-one suite of essential tools for everyday tasks
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
+            A collection of essential productivity tools designed to simplify your daily workflow
           </p>
+          {user && <Button variant="outline" onClick={() => navigate("/profile")}>My Profile</Button>}
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tools.map((tool, index) => (
-            <Link
-              key={tool.path}
-              to={tool.path}
-              className="group"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <Card className="p-8 h-full transition-all duration-300 hover:shadow-[var(--shadow-hover)] hover:scale-105 animate-scale-in">
-                <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
-                  <tool.icon className="h-8 w-8 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-foreground mb-3">
-                  {tool.title}
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  {tool.description}
-                </p>
-              </Card>
-            </Link>
-          ))}
+        {pinnedAppsList.length > 0 && (
+          <div className="mb-12 animate-fade-in">
+            <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+              <Pin className="h-8 w-8 text-primary" />
+              Pinned Apps
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pinnedAppsList.map((app, index) => {
+                const Icon = app.icon;
+                const isPinned = pinnedApps.includes(app.path);
+                return (
+                  <Card key={index} className="group relative overflow-hidden border-border/50 backdrop-blur-sm bg-card/50 h-full">
+                    <div className={`absolute inset-0 bg-gradient-to-br ${app.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                    <div className="p-6 relative z-10">
+                      <div className="flex justify-between items-start mb-4">
+                        <Icon className="w-10 h-10 text-primary group-hover:scale-110 transition-transform duration-300" />
+                        <Button size="icon" variant="ghost" onClick={(e) => { e.preventDefault(); togglePin(app.path); }} className="h-8 w-8">
+                          {isPinned ? <Pin className="h-4 w-4 text-primary" /> : <PinOff className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <Link to={app.path}>
+                        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors cursor-pointer">{app.title}</h3>
+                        <p className="text-sm text-muted-foreground">{app.description}</p>
+                      </Link>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="mb-12 animate-fade-in">
+          <h2 className="text-3xl font-bold mb-6 flex items-center gap-2">
+            <Sparkles className="h-8 w-8 text-primary" />
+            Best Apps
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {bestApps.map((app, index) => {
+              const Icon = app.icon;
+              const isPinned = pinnedApps.includes(app.path);
+              return (
+                <Card key={index} className="group relative overflow-hidden border-border/50 backdrop-blur-sm bg-card/50 h-full">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${app.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                  <div className="p-6 relative z-10">
+                    <div className="flex justify-between items-start mb-4">
+                      <Icon className="w-10 h-10 text-primary group-hover:scale-110 transition-transform duration-300" />
+                      <Button size="icon" variant="ghost" onClick={(e) => { e.preventDefault(); togglePin(app.path); }} className="h-8 w-8">
+                        {isPinned ? <Pin className="h-4 w-4 text-primary" /> : <PinOff className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <Link to={app.path}>
+                      <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors cursor-pointer">{app.title}</h3>
+                      <p className="text-sm text-muted-foreground">{app.description}</p>
+                    </Link>
+                    <Badge variant="secondary" className="mt-2">Featured</Badge>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="animate-fade-in">
+          <h2 className="text-3xl font-bold mb-6">All Apps</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {otherApps.map((app, index) => {
+              const Icon = app.icon;
+              const isPinned = pinnedApps.includes(app.path);
+              return (
+                <Card key={index} className="group relative overflow-hidden border-border/50 backdrop-blur-sm bg-card/50 h-full">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${app.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                  <div className="p-6 relative z-10">
+                    <div className="flex justify-between items-start mb-4">
+                      <Icon className="w-10 h-10 text-primary group-hover:scale-110 transition-transform duration-300" />
+                      <Button size="icon" variant="ghost" onClick={(e) => { e.preventDefault(); togglePin(app.path); }} className="h-8 w-8">
+                        {isPinned ? <Pin className="h-4 w-4 text-primary" /> : <PinOff className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <Link to={app.path}>
+                      <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors cursor-pointer">{app.title}</h3>
+                      <p className="text-sm text-muted-foreground">{app.description}</p>
+                    </Link>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </div>
       <Footer />
