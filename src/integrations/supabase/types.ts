@@ -79,6 +79,36 @@ export type Database = {
           },
         ]
       }
+      habits: {
+        Row: {
+          completed_today: boolean
+          created_at: string
+          id: string
+          name: string
+          streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_today?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_today?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notes: {
         Row: {
           content: string
