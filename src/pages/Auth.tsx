@@ -108,24 +108,55 @@ const Auth = () => {
         const code = Math.floor(10000 + Math.random() * 90000).toString();
         const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-        // Store verification code directly (without Edge Function)
-        const { error: dbError } = await supabase
-          .from("email_verifications")
-          .insert({
-            user_id: data.user.id,
-            code,
-            expires_at: expiresAt.toISOString(),
+        console.log(`Generated verification code: ${code} for user: ${data.user.id}`);
+
+        // Try to store verification code using RPC function approach
+        // This bypasses RLS by using a proper database function
+        let codeStored = false;
+        try {
+          const { data: insertResult, error: rpcError } = await (supabase as any).rpc('insert_verification_code', {
+            p_user_id: data.user.id,
+            p_code: code,
+            p_expires_at: expiresAt.toISOString(),
           });
 
-        if (dbError) {
-          console.error('Database error:', dbError);
-          toast({
-            title: "Verification email failed",
-            description: "Failed to create verification code. Please try again.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
+          if (!rpcError && insertResult) {
+            console.log('✅ Verification code stored via RPC function');
+            codeStored = true;
+          }
+        } catch (rpcErr) {
+          console.warn('RPC not available, trying fallback method');
+        }
+
+        // Fallback: Try direct insert if RPC doesn't exist
+        if (!codeStored) {
+          console.log('Attempting direct insert as fallback...');
+          const { error: dbError } = await supabase
+            .from("email_verifications")
+            .insert({
+              user_id: data.user.id,
+              code,
+              expires_at: expiresAt.toISOString(),
+            });
+
+          if (dbError) {
+            console.error('Direct insert error:', dbError);
+            
+            // If both fail, give detailed error
+            toast({
+              title: "Verification email failed",
+              description: `Database error: ${dbError.message || dbError.code || "Unknown error"}. Make sure the RLS policy allows inserts.`,
+              variant: "destructive",
+            });
+            
+            // Delete the auth user since we couldn't create verification
+            await (supabase.auth as any).admin.deleteUser(data.user.id).catch((e: any) => console.log('Could not delete user'));
+            
+            setLoading(false);
+            return;
+          }
+          console.log('✅ Verification code stored via direct insert');
+          codeStored = true;
         }
 
         // For now, log the code to console (in production, this would send via email)
@@ -145,7 +176,7 @@ const Auth = () => {
         setLoading(false);
         toast({
           title: "Check your email",
-          description: "We've sent you a 5-digit verification code.",
+          description: `Verification code: ${code} (also check console)`,
         });
       } catch (err) {
         console.error('Unexpected error:', err);
@@ -174,7 +205,31 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Query verification code directly from database
+      // Try to use RPC function first for verification
+      try {
+        const { data: result, error: rpcError } = await (supabase as any).rpc('verify_email_code', {
+          p_user_id: tempUserId,
+          p_code: verificationCode,
+        });
+
+        if (!rpcError && result && result[0]?.success) {
+          // RPC verification succeeded
+          toast({
+            title: "Email verified!",
+            description: "Your account has been created. You can now sign in.",
+          });
+          setVerificationStep(false);
+          setVerificationCode("");
+          setEmail("");
+          setPassword("");
+          setLoading(false);
+          return;
+        }
+      } catch (rpcErr) {
+        console.warn('RPC verification not available, falling back to direct query');
+      }
+
+      // Fallback: Query verification code directly from database
       const { data: verification, error: fetchError } = await supabase
         .from("email_verifications")
         .select("*")
