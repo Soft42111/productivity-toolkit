@@ -4,21 +4,23 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, RotateCcw } from "lucide-react";
 import { Link } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
+import { supabase } from "@/integrations/supabase/client";
 import Footer from "@/components/Footer";
 
-const sampleTexts = [
-  "The quick brown fox jumps over the lazy dog and runs through the meadow with great speed and agility",
-  "Programming is the art of telling another human what one wants the computer to do in a clear way",
-  "Innovation drives progress and creativity fuels imagination in the ever evolving world of technology",
-  "Practice makes perfect and typing speed improves with consistent effort and dedication over time",
-  "Web development combines creativity with logic to build amazing experiences for users worldwide",
+// fallback list for local generation
+const fallbackWords = [
+  "time","person","year","way","day","thing","man","world","life","hand",
+  "part","child","eye","woman","place","work","week","case","point","government",
+  "company","number","group","problem","fact","home","water","room","mother","area",
+  "money","story","service","team","phone","idea","computer","language","power","mind",
+  "book","night","school","state","family","example","study","system","program","question",
 ];
 
 const TypingTest = () => {
-  const [text, setText] = useState("");
-  const [input, setInput] = useState("");
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [correctChars, setCorrectChars] = useState<boolean[]>([]);
+  const [words, setWords] = useState<string[]>([]);
+  const [typedWords, setTypedWords] = useState<string[]>([]);
+  const [currentInput, setCurrentInput] = useState("");
+  const [correctWords, setCorrectWords] = useState<boolean[]>([]);
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
@@ -47,59 +49,77 @@ const TypingTest = () => {
   }, [startTime, isComplete]);
 
   const resetTest = () => {
-    const randomText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
-    setText(randomText);
-    setInput("");
-    setCurrentIndex(0);
-    setCorrectChars([]);
+    setWords([]);
+    setTypedWords([]);
+    setCurrentInput("");
+    setCorrectWords([]);
     setStartTime(null);
     setElapsedTime(0);
     setIsComplete(false);
     setErrors(0);
     if (timerRef.current) clearInterval(timerRef.current);
     inputRef.current?.focus();
+    // fetch initial batch
+    fetchWordsBatch(20).then(batch => setWords(batch));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (isComplete) return;
 
-    if (!startTime) {
-      setStartTime(Date.now());
-    }
+    if (!startTime) setStartTime(Date.now());
 
-    if (e.key === "Backspace") {
-      if (currentIndex > 0) {
-        const newCorrectChars = [...correctChars];
-        newCorrectChars.pop();
-        setCorrectChars(newCorrectChars);
-        setCurrentIndex(currentIndex - 1);
-        setInput(input.slice(0, -1));
-      }
+    if (e.key === 'Backspace') {
+      // allow editing current input
       return;
     }
 
-    if (e.key.length === 1) {
-      const isCorrect = e.key === text[currentIndex];
-      const newCorrectChars = [...correctChars, isCorrect];
-      setCorrectChars(newCorrectChars);
-      setInput(input + e.key);
-      setCurrentIndex(currentIndex + 1);
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      if (!currentInput) return;
 
-      if (!isCorrect) {
-        setErrors(errors + 1);
+      const idx = typedWords.length;
+      const target = words[idx] || '';
+      const isCorrect = currentInput.trim() === target;
+      setCorrectWords(prev => [...prev, isCorrect]);
+      setTypedWords(prev => [...prev, currentInput.trim()]);
+      if (!isCorrect) setErrors(prev => prev + 1);
+      setCurrentInput('');
+
+      // fetch more when approaching end (after 15 typed)
+      if (typedWords.length + 1 >= 15 && words.length - (typedWords.length + 1) <= 5) {
+        fetchWordsBatch(20).then(batch => setWords(prev => [...prev, ...batch]));
       }
 
-      if (currentIndex + 1 === text.length) {
-        setIsComplete(true);
-      }
+      if (typedWords.length + 1 >= words.length) setIsComplete(true);
     }
   };
 
+  const fetchWordsBatch = async (count: number): Promise<string[]> => {
+    try {
+      const prompt = `Provide exactly ${count} single English words as a JSON array. Return only valid JSON array, no extra commentary.`;
+      const { data, error } = await (supabase as any).functions.invoke('gemini-chat', { body: { prompt, history: [] } });
+      if (!error && data?.text) {
+        const jsonMatch = data.text.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (Array.isArray(parsed)) return parsed.map((w: any) => String(w));
+        }
+      }
+    } catch (err) {
+      console.warn('AI fetch failed, falling back to local words', err);
+    }
+    const out: string[] = [];
+    for (let i = 0; i < count; i++) out.push(fallbackWords[Math.floor(Math.random() * fallbackWords.length)]);
+    return out;
+  };
+
   const calculateStats = () => {
-    const timeInMinutes = elapsedTime / 60;
-    const wpm = Math.round((input.length / 5) / timeInMinutes) || 0;
-    const cpm = Math.round(input.length / timeInMinutes) || 0;
-    const accuracy = Math.round((correctChars.filter(Boolean).length / correctChars.length) * 100) || 100;
+    const timeInMinutes = Math.max(elapsedTime / 60, 1/60); // avoid div by zero
+    const correctCount = correctWords.filter(Boolean).length;
+    const wpm = Math.round(correctCount / timeInMinutes) || 0;
+    const charsTyped = typedWords.join(' ').length;
+    const cpm = Math.round(charsTyped / timeInMinutes) || 0;
+    const accuracy = typedWords.length ? Math.round((correctCount / typedWords.length) * 100) : 100;
     return { wpm, cpm, accuracy };
   };
 
@@ -147,41 +167,52 @@ const TypingTest = () => {
 
           <Card className="p-8 bg-secondary/50 mb-6 border-2 border-primary/10 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-            <p className="text-2xl leading-relaxed font-mono tracking-wide relative z-10">
-              {text.split("").map((char, index) => {
-                let className = "transition-all duration-200 ";
-                
-                if (index < currentIndex) {
-                  className += correctChars[index]
-                    ? "text-accent drop-shadow-[0_0_8px_hsl(var(--accent)/0.5)]"
-                    : "text-destructive drop-shadow-[0_0_8px_hsl(var(--destructive)/0.5)]";
-                } else if (index === currentIndex) {
-                  className += "text-foreground animate-pulse border-b-4 border-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.8)]";
-                } else {
-                  className += "text-muted-foreground/60";
-                }
+            <div className="text-2xl leading-relaxed font-mono tracking-wide relative z-10">
+              <div className="flex flex-wrap gap-2">
+                {words.map((w, i) => {
+                  const typed = typedWords[i];
+                  const isCurrent = i === typedWords.length;
+                  const className = typed
+                    ? typed === w
+                      ? 'text-accent'
+                      : 'text-destructive'
+                    : isCurrent
+                      ? 'underline text-foreground'
+                      : 'text-muted-foreground/60';
 
-                return (
-                  <span key={index} className={className}>
-                    {char}
-                  </span>
-                );
-              })}
-            </p>
+                  return (
+                    <span key={i} className={`px-1 ${className}`}>
+                      {w}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
           </Card>
 
           <div className="space-y-4">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onKeyDown={handleKeyDown}
-              placeholder={isComplete ? "Test completed!" : "Start typing..."}
-              className="w-full px-6 py-4 text-lg font-mono rounded-lg border-2 border-primary/30 bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
-              disabled={isComplete}
-              autoComplete="off"
-              spellCheck="false"
-            />
+            <div>
+              <input
+                ref={inputRef}
+                type="text"
+                value={currentInput}
+                onChange={(e) => setCurrentInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={isComplete ? "Test completed!" : "Type the current word and press space..."}
+                className="w-full px-6 py-4 text-lg font-mono rounded-lg border-2 border-primary/30 bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all disabled:opacity-50"
+                disabled={isComplete}
+                autoComplete="off"
+                spellCheck="false"
+              />
+              <div className="flex gap-2 mt-2">
+                <Button onClick={() => {
+                  // manual commit
+                  const syntheticEvent: any = { key: ' ' };
+                  handleKeyDown(syntheticEvent as any);
+                }} disabled={!currentInput}>Next</Button>
+                <Button variant="outline" onClick={resetTest}>Reset</Button>
+              </div>
+            </div>
 
             {isComplete && (
               <Card className="p-8 bg-gradient-to-br from-primary/20 to-accent/20 border-2 border-primary/40 backdrop-blur-sm">
