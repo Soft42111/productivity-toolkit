@@ -30,6 +30,7 @@ import QuoteGenerator from "./pages/QuoteGenerator";
 import CountdownTimer from "./pages/CountdownTimer";
 import HabitTracker from "./pages/HabitTracker";
 import UserProfile from "./pages/UserProfile";
+import PinnedApps from "./pages/PinnedApps";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/pinned" element={<PinnedApps />} />
           <Route path="/calculator" element={<Calculator />} />
           <Route path="/todo" element={<TodoList />} />
           <Route path="/typing-test" element={<TypingTest />} />
