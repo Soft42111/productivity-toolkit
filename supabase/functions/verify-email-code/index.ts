@@ -22,6 +22,15 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { userId, code }: VerifyRequest = await req.json();
     
+    console.log(`Verifying code for user: ${userId}, code: ${code}`);
+
+    if (!userId || !code) {
+      return new Response(
+        JSON.stringify({ error: "Missing userId or code" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Check for valid verification code
@@ -39,17 +48,20 @@ const handler = async (req: Request): Promise<Response> => {
     if (fetchError) {
       console.error("Fetch error:", fetchError);
       return new Response(
-        JSON.stringify({ error: "Database error" }),
+        JSON.stringify({ error: `Database error: ${fetchError.message}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (!verification) {
+      console.log(`No valid verification record found for user: ${userId}`);
       return new Response(
         JSON.stringify({ error: "Invalid or expired verification code" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    console.log(`Found verification record: ${verification.id}`);
 
     // Mark as verified
     const { error: updateError } = await supabase
@@ -60,10 +72,12 @@ const handler = async (req: Request): Promise<Response> => {
     if (updateError) {
       console.error("Update error:", updateError);
       return new Response(
-        JSON.stringify({ error: "Failed to verify code" }),
+        JSON.stringify({ error: `Failed to verify code: ${updateError.message}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    console.log("Email verified successfully");
 
     return new Response(
       JSON.stringify({ success: true, message: "Email verified successfully" }),
@@ -74,8 +88,9 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in verify-email-code function:", error);
+    console.error("Error stack:", error.stack);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: `Server error: ${error.message}` }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

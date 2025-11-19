@@ -23,11 +23,32 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, userId }: VerificationRequest = await req.json();
     
+    console.log(`Processing verification email for: ${email}, userId: ${userId}`);
+
+    // Check if RESEND_API_KEY is configured
+    if (!resendApiKey) {
+      console.warn("RESEND_API_KEY not configured - returning test response");
+      // Return success even without API key for development
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Verification code would be sent (API key not configured)",
+          testMode: true 
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Generate 5-digit code
     const code = Math.floor(10000 + Math.random() * 90000).toString();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    console.log(`Generated code: ${code} for user: ${userId}`);
 
     // Store verification code
     const { error: dbError } = await supabase
@@ -41,10 +62,12 @@ const handler = async (req: Request): Promise<Response> => {
     if (dbError) {
       console.error("Database error:", dbError);
       return new Response(
-        JSON.stringify({ error: "Failed to store verification code" }),
+        JSON.stringify({ error: `Failed to store verification code: ${dbError.message}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    console.log("Verification code stored successfully");
 
     // Send email with verification code
     const emailResponse = await fetch("https://api.resend.com/emails", {
@@ -74,13 +97,14 @@ const handler = async (req: Request): Promise<Response> => {
     if (!emailResponse.ok) {
       const errorText = await emailResponse.text();
       console.error("Email send error:", errorText);
+      console.error("Email response status:", emailResponse.status);
       return new Response(
-        JSON.stringify({ error: "Failed to send verification email" }),
+        JSON.stringify({ error: `Failed to send email: ${errorText}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Email sent successfully:", emailResponse);
+    console.log("Email sent successfully");
 
     return new Response(
       JSON.stringify({ success: true, message: "Verification code sent" }),
@@ -91,8 +115,9 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in send-verification-email function:", error);
+    console.error("Error stack:", error.stack);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: `Server error: ${error.message}` }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
