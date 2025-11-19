@@ -103,24 +103,43 @@ const Auth = () => {
       setTempUserId(data.user.id);
       
       // Send verification email
-      const { error: funcError } = await supabase.functions.invoke('send-verification-email', {
-        body: { email, userId: data.user.id }
-      });
+      try {
+        const { data: funcData, error: funcError } = await supabase.functions.invoke('send-verification-email', {
+          body: { email, userId: data.user.id }
+        });
 
-      if (funcError) {
+        if (funcError) {
+          console.error('Function error:', funcError);
+          toast({
+            title: "Verification email failed",
+            description: funcError.message || "Please try again or contact support.",
+            variant: "destructive",
+          });
+          setLoading(false);
+        } else if (funcData?.error) {
+          console.error('Function returned error:', funcData.error);
+          toast({
+            title: "Verification email failed",
+            description: funcData.error,
+            variant: "destructive",
+          });
+          setLoading(false);
+        } else {
+          setVerificationStep(true);
+          setLoading(false);
+          toast({
+            title: "Check your email",
+            description: "We've sent you a 5-digit verification code.",
+          });
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
         toast({
           title: "Verification email failed",
-          description: "Please try again or contact support.",
+          description: "An unexpected error occurred. Please try again.",
           variant: "destructive",
         });
         setLoading(false);
-      } else {
-        setVerificationStep(true);
-        setLoading(false);
-        toast({
-          title: "Check your email",
-          description: "We've sent you a 5-digit verification code.",
-        });
       }
     }
   };
@@ -139,26 +158,45 @@ const Auth = () => {
 
     setLoading(true);
 
-    const { data, error } = await supabase.functions.invoke('verify-email-code', {
-      body: { userId: tempUserId, code: verificationCode }
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-email-code', {
+        body: { userId: tempUserId, code: verificationCode }
+      });
 
-    if (error || data?.error) {
+      if (error) {
+        console.error('Function error:', error);
+        toast({
+          title: "Verification failed",
+          description: error.message || "Invalid or expired code",
+          variant: "destructive",
+        });
+        setLoading(false);
+      } else if (data?.error) {
+        console.error('Function returned error:', data.error);
+        toast({
+          title: "Verification failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        setLoading(false);
+      } else {
+        toast({
+          title: "Email verified!",
+          description: "Your account has been created. You can now sign in.",
+        });
+        setVerificationStep(false);
+        setVerificationCode("");
+        setEmail("");
+        setPassword("");
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
       toast({
         title: "Verification failed",
-        description: data?.error || error?.message || "Invalid or expired code",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
-      setLoading(false);
-    } else {
-      toast({
-        title: "Email verified!",
-        description: "Your account has been created. You can now sign in.",
-      });
-      setVerificationStep(false);
-      setVerificationCode("");
-      setEmail("");
-      setPassword("");
       setLoading(false);
     }
   };

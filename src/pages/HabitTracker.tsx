@@ -18,6 +18,8 @@ interface Habit {
   completed_today: boolean;
   streak: number;
   user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const HabitTracker = () => {
