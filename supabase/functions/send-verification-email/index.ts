@@ -33,26 +33,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Generated code: ${code} for user: ${userId}`);
 
-    // Store verification code
-    const { error: dbError } = await supabase
-      .from("email_verifications")
-      .insert({
-        user_id: userId,
-        code,
-        expires_at: expiresAt.toISOString(),
-      });
-
-    if (dbError) {
-      console.error("Database error:", dbError);
-      return new Response(
-        JSON.stringify({ error: `Failed to store verification code: ${dbError.message}` }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log("Verification code stored successfully");
-
-    // Send email with verification code
+    // IMPORTANT: Send email FIRST before storing in database
+    // This ensures we don't create orphaned verification records
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -88,7 +70,27 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    console.log("Email sent successfully");
+    console.log("Email sent successfully, now storing verification code");
+
+    // Only store in database AFTER email is successfully sent
+    const { error: dbError } = await supabase
+      .from("email_verifications")
+      .insert({
+        user_id: userId,
+        code,
+        expires_at: expiresAt.toISOString(),
+      });
+
+    if (dbError) {
+      console.error("Database error:", dbError);
+      return new Response(
+        JSON.stringify({ error: `Failed to store verification code: ${dbError.message}` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+
+    console.log("Verification code stored successfully");
 
     return new Response(
       JSON.stringify({ success: true, message: "Verification code sent" }),
