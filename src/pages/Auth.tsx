@@ -159,25 +159,47 @@ const Auth = () => {
           codeStored = true;
         }
 
-        // For now, log the code to console (in production, this would send via email)
+
+        // For now, log the code to console for development only
         console.log(`✅ Verification code for ${email}: ${code}`);
         
-        // Try to invoke function if available, but don't fail if it's not deployed
+        // Try to send email - this is REQUIRED, not optional
         try {
-          await supabase.functions.invoke('send-verification-email', {
+          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-verification-email', {
             body: { email, userId: data.user.id }
           });
-        } catch (funcErr) {
-          console.warn('Edge Function not available, code stored locally:', code);
-          // Function failed but code is already stored, so continue anyway
-        }
 
-        setVerificationStep(true);
-        setLoading(false);
-        toast({
-          title: "Check your email",
-          description: `Verification code: ${code} (also check console)`,
-        });
+          if (emailError) {
+            throw new Error(emailError.message);
+          }
+
+          // Check if email sending actually failed
+          if (emailResult?.error) {
+            throw new Error(emailResult.error);
+          }
+
+          // Email sent successfully
+          setVerificationStep(true);
+          setLoading(false);
+          toast({
+            title: "Check your email",
+            description: `We've sent a verification code to ${email}`,
+          });
+        } catch (emailErr: any) {
+          console.error('Email sending failed:', emailErr);
+          
+          // Delete the user since we couldn't send the email
+          await supabase.auth.admin.deleteUser(data.user.id).catch(console.error);
+          
+          // Show error to user with instructions
+          toast({
+            title: "Email sending failed",
+            description: "Could not send verification email. Please verify your domain at resend.com/domains and update the 'from' address.",
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
       } catch (err) {
         console.error('Unexpected error:', err);
         toast({
