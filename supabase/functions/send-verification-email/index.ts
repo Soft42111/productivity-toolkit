@@ -98,6 +98,20 @@ const handler = async (req: Request): Promise<Response> => {
       const errorText = await emailResponse.text();
       console.error("Email send error:", errorText);
       console.error("Email response status:", emailResponse.status);
+      
+      // If it's a 403 domain verification error, treat as test mode
+      if (emailResponse.status === 403 && errorText.includes("verify a domain")) {
+        console.log("Domain not verified - continuing in test mode");
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: "Verification code stored (email not sent - domain verification required)",
+            testMode: true 
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
       return new Response(
         JSON.stringify({ error: `Failed to send email: ${errorText}` }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
