@@ -102,112 +102,49 @@ const Auth = () => {
     } else if (data.user) {
       setTempUserId(data.user.id);
       
-      // Send verification email
+      // Send verification email - this is REQUIRED
       try {
-        // Generate verification code
-        const code = Math.floor(10000 + Math.random() * 90000).toString();
-        const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+        const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-verification-email', {
+          body: { email, userId: data.user.id }
+        });
 
-        console.log(`Generated verification code: ${code} for user: ${data.user.id}`);
-
-        // Try to store verification code using RPC function approach
-        // This bypasses RLS by using a proper database function
-        let codeStored = false;
-        try {
-          const { data: insertResult, error: rpcError } = await (supabase as any).rpc('insert_verification_code', {
-            p_user_id: data.user.id,
-            p_code: code,
-            p_expires_at: expiresAt.toISOString(),
-          });
-
-          if (!rpcError && insertResult) {
-            console.log('✅ Verification code stored via RPC function');
-            codeStored = true;
-          }
-        } catch (rpcErr) {
-          console.warn('RPC not available, trying fallback method');
+        if (emailError) {
+          throw new Error(emailError.message);
         }
 
-        // Fallback: Try direct insert if RPC doesn't exist
-        if (!codeStored) {
-          console.log('Attempting direct insert as fallback...');
-          const { error: dbError } = await supabase
-            .from("email_verifications")
-            .insert({
-              user_id: data.user.id,
-              code,
-              expires_at: expiresAt.toISOString(),
-            });
-
-          if (dbError) {
-            console.error('Direct insert error:', dbError);
-            
-            // If both fail, give detailed error
-            toast({
-              title: "Verification email failed",
-              description: `Database error: ${dbError.message || dbError.code || "Unknown error"}. Make sure the RLS policy allows inserts.`,
-              variant: "destructive",
-            });
-            
-            // Delete the auth user since we couldn't create verification
-            await (supabase.auth as any).admin.deleteUser(data.user.id).catch((e: any) => console.log('Could not delete user'));
-            
-            setLoading(false);
-            return;
-          }
-          console.log('✅ Verification code stored via direct insert');
-          codeStored = true;
+        // Check if email sending actually failed
+        if (emailResult?.error) {
+          throw new Error(emailResult.error);
         }
 
-
-        // For now, log the code to console for development only
-        console.log(`✅ Verification code for ${email}: ${code}`);
-        
-        // Try to send email - this is REQUIRED, not optional
-        try {
-          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-verification-email', {
-            body: { email, userId: data.user.id }
-          });
-
-          if (emailError) {
-            throw new Error(emailError.message);
-          }
-
-          // Check if email sending actually failed
-          if (emailResult?.error) {
-            throw new Error(emailResult.error);
-          }
-
-          // Email sent successfully
-          setVerificationStep(true);
-          setLoading(false);
-          toast({
-            title: "Check your email",
-            description: `We've sent a verification code to ${email}`,
-          });
-        } catch (emailErr: any) {
-          console.error('Email sending failed:', emailErr);
-          
-          // Delete the user since we couldn't send the email
-          await supabase.auth.admin.deleteUser(data.user.id).catch(console.error);
-          
-          // Show error to user with instructions
-          toast({
-            title: "Email sending failed",
-            description: "Could not send verification email. Please verify your domain at resend.com/domains and update the 'from' address.",
-            variant: "destructive",
-          });
-          setLoading(false);
-          return;
-        }
-      } catch (err) {
-        console.error('Unexpected error:', err);
+        // Email sent successfully
+        setVerificationStep(true);
+        setLoading(false);
         toast({
-          title: "Verification email failed",
-          description: "An unexpected error occurred. Please try again.",
+          title: "Check your email",
+          description: `We've sent a verification code to ${email}`,
+        });
+      } catch (emailErr: any) {
+        console.error('Email sending failed:', emailErr);
+        
+        // Delete the user since we couldn't send the email
+        // Use the auth API to delete the user
+        const { error: deleteError } = await supabase.auth.admin.deleteUser(data.user.id);
+        
+        if (deleteError) {
+          console.error('Failed to delete user:', deleteError);
+          // Even if we can't delete via admin, we should sign them out
+          await supabase.auth.signOut();
+        }
+        
+        // Show error to user with instructions
+        toast({
+          title: "Email sending failed",
+          description: "Could not send verification email. Please verify your domain at resend.com/domains and update the 'from' address.",
           variant: "destructive",
         });
         setLoading(false);
+        return;
       }
     }
   };
