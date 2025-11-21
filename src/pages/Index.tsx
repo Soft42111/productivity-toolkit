@@ -159,13 +159,6 @@ const Index = () => {
         </div>
         
         <div className="text-center mb-12 animate-fade-in">
-          <div className="mb-8 flex justify-center">
-            <img 
-              src="/cover.png" 
-              alt="Productivity Dashboard Preview" 
-              className="rounded-2xl shadow-[var(--shadow-hover)] max-w-3xl w-full border-2 border-primary/20 hover:scale-105 transition-transform duration-300"
-            />
-          </div>
           <h1 className="text-7xl font-bold mb-4 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             Power Tools
           </h1>
