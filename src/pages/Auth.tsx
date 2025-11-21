@@ -14,9 +14,6 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [verificationStep, setVerificationStep] = useState(false);
-  const [verificationCode, setVerificationCode] = useState("");
-  const [tempUserId, setTempUserId] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -84,7 +81,7 @@ const Auth = () => {
 
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -98,174 +95,17 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
-      setLoading(false);
-    } else if (data.user) {
-      setTempUserId(data.user.id);
-      
-      // Send verification email - this is REQUIRED
-      try {
-        const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-verification-email', {
-          body: { email, userId: data.user.id }
-        });
-
-        if (emailError) {
-          throw new Error(emailError.message);
-        }
-
-        // Check if email sending actually failed
-        if (emailResult?.error) {
-          throw new Error(emailResult.error);
-        }
-
-        // Email sent successfully
-        setVerificationStep(true);
-        setLoading(false);
-        toast({
-          title: "Check your email",
-          description: `We've sent a verification code to ${email}`,
-        });
-      } catch (emailErr: any) {
-        console.error('Email sending failed:', emailErr);
-        
-        // Delete the user since we couldn't send the email
-        // Use the auth API to delete the user
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(data.user.id);
-        
-        if (deleteError) {
-          console.error('Failed to delete user:', deleteError);
-          // Even if we can't delete via admin, we should sign them out
-          await supabase.auth.signOut();
-        }
-        
-        // Show error to user with instructions
-        toast({
-          title: "Email sending failed",
-          description: "Could not send verification email. Please verify your domain at resend.com/domains and update the 'from' address.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-    }
-  };
-
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (verificationCode.length !== 5) {
+    } else {
       toast({
-        title: "Invalid Code",
-        description: "Please enter the 5-digit code from your email.",
-        variant: "destructive",
+        title: "Check your email",
+        description: `We've sent a confirmation link to ${email}. Please check your inbox and click the link to verify your account.`,
       });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Try to use RPC function first for verification
-      try {
-        const { data: result, error: rpcError } = await (supabase as any).rpc('verify_email_code', {
-          p_user_id: tempUserId,
-          p_code: verificationCode,
-        });
-
-        if (!rpcError && result && result[0]?.success) {
-          // RPC verification succeeded
-          toast({
-            title: "Email verified!",
-            description: "Your account has been created. You can now sign in.",
-          });
-          setVerificationStep(false);
-          setVerificationCode("");
-          setEmail("");
-          setPassword("");
-          setLoading(false);
-          return;
-        }
-      } catch (rpcErr) {
-        console.warn('RPC verification not available, falling back to direct query');
-      }
-
-      // Fallback: Query verification code directly from database
-      const { data: verification, error: fetchError } = await supabase
-        .from("email_verifications")
-        .select("*")
-        .eq("user_id", tempUserId)
-        .eq("code", verificationCode)
-        .eq("verified", false)
-        .gt("expires_at", new Date().toISOString())
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (fetchError) {
-        console.error('Fetch error:', fetchError);
-        toast({
-          title: "Verification failed",
-          description: "Database error. Please try again.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      if (!verification) {
-        toast({
-          title: "Verification failed",
-          description: "Invalid or expired verification code",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Mark as verified
-      const { error: updateError } = await supabase
-        .from("email_verifications")
-        .update({ verified: true })
-        .eq("id", verification.id);
-
-      if (updateError) {
-        console.error('Update error:', updateError);
-        toast({
-          title: "Verification failed",
-          description: "Failed to verify code. Please try again.",
-          variant: "destructive",
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Try to invoke function if available, but don't fail if it's not deployed
-      try {
-        await supabase.functions.invoke('verify-email-code', {
-          body: { userId: tempUserId, code: verificationCode }
-        });
-      } catch (funcErr) {
-        console.warn('Edge Function not available, but verification succeeded locally');
-        // Function failed but verification is already done, so continue anyway
-      }
-
-      toast({
-        title: "Email verified!",
-        description: "Your account has been created. You can now sign in.",
-      });
-      setVerificationStep(false);
-      setVerificationCode("");
+      // Clear form
       setEmail("");
       setPassword("");
-      setLoading(false);
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      toast({
-        title: "Verification failed",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
-      });
-      setLoading(false);
     }
+
+    setLoading(false);
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -292,60 +132,6 @@ const Auth = () => {
 
     setLoading(false);
   };
-
-  if (verificationStep) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-secondary p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader>
-            <CardTitle className="text-2xl text-center">Verify Your Email</CardTitle>
-            <CardDescription className="text-center">
-              Enter the 5-digit code sent to {email}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleVerifyCode} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="code">Verification Code</Label>
-                <Input
-                  id="code"
-                  type="text"
-                  placeholder="12345"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 5))}
-                  maxLength={5}
-                  required
-                  className="text-center text-2xl tracking-widest"
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading || verificationCode.length !== 5}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  "Verify Email"
-                )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  setVerificationStep(false);
-                  setVerificationCode("");
-                  setTempUserId("");
-                }}
-              >
-                Back to Sign Up
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-secondary p-4">
