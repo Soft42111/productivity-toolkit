@@ -8,7 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import ShootingStars from "@/components/ShootingStars";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
-import type { User } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 import { 
   Calculator, 
   ListTodo, 
@@ -45,19 +45,26 @@ import {
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [pinnedApps, setPinnedApps] = useState<string[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session) fetchPinnedApps();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      setUser(newSession?.user ?? null);
+      if (newSession) {
+        fetchPinnedApps();
+      }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session) fetchPinnedApps();
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      if (currentSession) {
+        fetchPinnedApps();
+      }
     });
 
     return () => subscription.unsubscribe();
