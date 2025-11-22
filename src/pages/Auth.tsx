@@ -23,17 +23,25 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for password recovery hash in URL
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    
+    if (type === 'recovery') {
+      setUpdatePasswordMode(true);
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       // Check if this is a password recovery event
       if (event === 'PASSWORD_RECOVERY') {
         setUpdatePasswordMode(true);
-      } else if (session && !updatePasswordMode) {
+      } else if (session && !updatePasswordMode && type !== 'recovery') {
         navigate("/");
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session && !updatePasswordMode) {
+      if (session && !updatePasswordMode && type !== 'recovery') {
         navigate("/");
       }
     });
