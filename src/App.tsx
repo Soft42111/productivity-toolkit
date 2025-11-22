@@ -31,6 +31,10 @@ import CountdownTimer from "./pages/CountdownTimer";
 import HabitTracker from "./pages/HabitTracker";
 import UserProfile from "./pages/UserProfile";
 import PinnedApps from "./pages/PinnedApps";
+import WeatherDashboard from "./pages/WeatherDashboard";
+import CurrencyConverter from "./pages/CurrencyConverter";
+import VoiceRecorder from "./pages/VoiceRecorder";
+import LinkShortener from "./pages/LinkShortener";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +71,10 @@ const App = () => (
           <Route path="/countdown" element={<CountdownTimer />} />
           <Route path="/habit-tracker" element={<HabitTracker />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/weather" element={<WeatherDashboard />} />
+          <Route path="/currency" element={<CurrencyConverter />} />
+          <Route path="/voice-recorder" element={<VoiceRecorder />} />
+          <Route path="/link-shortener" element={<LinkShortener />} />
           <Route path="/auth" element={<Auth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -36,7 +36,11 @@ import {
   Cake,
   FileType,
   Bot,
-  UserCircle
+  UserCircle,
+  Cloud,
+  TrendingUp,
+  Mic,
+  Link2
 } from "lucide-react";
 
 const Index = () => {
@@ -110,10 +114,14 @@ const Index = () => {
 
   const allApps = [
     { title: "Chat with Gemini", description: "AI-powered conversational assistant", icon: Bot, path: "/chat-gemini", gradient: "from-purple-500 to-pink-500", isBest: true },
+    { title: "Weather Dashboard", description: "Real-time weather data", icon: Cloud, path: "/weather", gradient: "from-blue-500 to-cyan-500", isBest: true },
+    { title: "Currency Converter", description: "Live exchange rates", icon: TrendingUp, path: "/currency", gradient: "from-green-500 to-emerald-500", isBest: true },
     { title: "Notes App", description: "Markdown-powered note taking", icon: StickyNote, path: "/notes", gradient: "from-yellow-500 to-orange-500", isBest: true },
     { title: "Habit Tracker", description: "Build and track daily habits", icon: Target, path: "/habit-tracker", gradient: "from-green-500 to-teal-500", isBest: true },
     { title: "Expense Tracker", description: "Track spending by category", icon: DollarSign, path: "/expenses", gradient: "from-blue-500 to-cyan-500", isBest: true },
-    { title: "Pomodoro Timer", description: "Focus with timed work sessions", icon: Clock, path: "/pomodoro", gradient: "from-red-500 to-pink-500", isBest: true },
+    { title: "Voice Recorder", description: "Record and download audio", icon: Mic, path: "/voice-recorder", gradient: "from-red-500 to-rose-500", isBest: true },
+    { title: "Link Shortener", description: "Create short URLs", icon: Link2, path: "/link-shortener", gradient: "from-indigo-500 to-violet-500", isBest: true },
+    { title: "Pomodoro Timer", description: "Focus with timed work sessions", icon: Clock, path: "/pomodoro", gradient: "from-red-500 to-pink-500", isBest: false },
     { title: "Calculator", description: "Basic arithmetic calculator", icon: Calculator, path: "/calculator", gradient: "from-primary to-accent", isBest: false },
     { title: "Todo List", description: "Task management with cloud sync", icon: ListTodo, path: "/todo", gradient: "from-accent to-primary", isBest: false },
     { title: "Typing Test", description: "Test WPM and accuracy", icon: Keyboard, path: "/typing-test", gradient: "from-primary via-accent to-primary", isBest: false },
