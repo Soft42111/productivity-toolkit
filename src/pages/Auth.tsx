@@ -14,50 +14,30 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
-  const [updatePasswordMode, setUpdatePasswordMode] = useState(false);
-  const [emailConfirmed, setEmailConfirmed] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for hash parameters in URL
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const type = hashParams.get('type');
-    
-    if (type === 'recovery') {
-      setUpdatePasswordMode(true);
-    } else if (type === 'signup') {
-      // Email confirmation flow
-      setEmailConfirmed(true);
-      toast({
-        title: "Email verified!",
-        description: "Your email has been verified. You can now sign in.",
-      });
-      // Clear the hash
-      window.history.replaceState(null, '', window.location.pathname);
-    }
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      // Check if this is a password recovery event
-      if (event === 'PASSWORD_RECOVERY') {
-        setUpdatePasswordMode(true);
-      } else if (session && !updatePasswordMode && type !== 'recovery' && type !== 'signup') {
+      if (session) {
         navigate("/");
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session && !updatePasswordMode && type !== 'recovery' && type !== 'signup') {
+      if (session) {
         navigate("/");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, updatePasswordMode, toast]);
+  }, [navigate]);
 
   const generatePassword = () => {
     const length = 16;
@@ -121,17 +101,16 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+      setLoading(false);
     } else {
+      setOtpSent(true);
+      setIsPasswordReset(false);
       toast({
         title: "Check your email",
-        description: `We've sent a confirmation link to ${email}. Please check your inbox and click the link to verify your account.`,
+        description: `We've sent a 6-digit verification code to ${email}.`,
       });
-      // Clear form
-      setEmail("");
-      setPassword("");
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleSignInWithGoogle = async () => {
@@ -167,29 +146,62 @@ const Auth = () => {
         description: error.message,
         variant: "destructive",
       });
+      setLoading(false);
     } else {
+      setOtpSent(true);
+      setIsPasswordReset(true);
       toast({
         title: "Check your email",
-        description: "We've sent you a password reset link.",
+        description: `We've sent a 6-digit code to ${email}.`,
       });
-      setResetMode(false);
-      setEmail("");
+      setLoading(false);
     }
+  };
 
-    setLoading(false);
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: isPasswordReset ? 'recovery' : 'signup',
+    });
+
+    if (error) {
+      toast({
+        title: "Verification failed",
+        description: error.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+    } else {
+      if (isPasswordReset) {
+        // For password reset, show the new password form
+        toast({
+          title: "Code verified!",
+          description: "Now enter your new password.",
+        });
+        setOtpSent(false);
+        setOtp("");
+        // Stay on page to enter new password
+      } else {
+        // For signup, complete verification
+        toast({
+          title: "Email verified!",
+          description: "You can now sign in with your credentials.",
+        });
+        setOtpSent(false);
+        setOtp("");
+        setEmail("");
+        setPassword("");
+      }
+      setLoading(false);
+    }
   };
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure both passwords are the same.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     const passwordError = validatePassword(newPassword);
     if (passwordError) {
@@ -216,12 +228,12 @@ const Auth = () => {
     } else {
       toast({
         title: "Password updated!",
-        description: "Your password has been successfully updated. You can now sign in.",
+        description: "Your password has been successfully updated.",
       });
-      setUpdatePasswordMode(false);
+      setIsPasswordReset(false);
+      setResetMode(false);
       setNewPassword("");
-      setConfirmPassword("");
-      navigate("/");
+      setEmail("");
     }
 
     setLoading(false);
@@ -252,7 +264,63 @@ const Auth = () => {
     setLoading(false);
   };
 
-  if (updatePasswordMode) {
+  if (otpSent) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-secondary p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">Enter Verification Code</CardTitle>
+            <CardDescription className="text-center">
+              We've sent a 6-digit code to {email}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="otp">Verification Code</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  placeholder="000000"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  required
+                  maxLength={6}
+                  className="text-center text-2xl tracking-widest"
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verifying...
+                  </>
+                ) : (
+                  "Verify Code"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setOtpSent(false);
+                  setOtp("");
+                  setEmail("");
+                  setPassword("");
+                  setResetMode(false);
+                }}
+              >
+                Back
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isPasswordReset && !otpSent) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-secondary p-4">
         <Card className="w-full max-w-md">
@@ -286,18 +354,6 @@ const Auth = () => {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm Password</Label>
-                <Input
-                  id="confirm-password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={8}
-                />
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>Password requirements:</p>
                   <ul className="list-disc list-inside space-y-0.5">
@@ -383,11 +439,11 @@ const Auth = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Productivity Toolkit</CardTitle>
           <CardDescription className="text-center">
-            {emailConfirmed ? "Email verified! Please sign in below." : "Sign in or create an account to get started"}
+            Sign in or create an account to get started
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue={emailConfirmed ? "signin" : "signin"} className="w-full">
+          <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
