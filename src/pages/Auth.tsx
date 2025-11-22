@@ -19,35 +19,45 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [updatePasswordMode, setUpdatePasswordMode] = useState(false);
+  const [emailConfirmed, setEmailConfirmed] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check for password recovery hash in URL
+    // Check for hash parameters in URL
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
     
     if (type === 'recovery') {
       setUpdatePasswordMode(true);
+    } else if (type === 'signup') {
+      // Email confirmation flow
+      setEmailConfirmed(true);
+      toast({
+        title: "Email verified!",
+        description: "Your email has been verified. You can now sign in.",
+      });
+      // Clear the hash
+      window.history.replaceState(null, '', window.location.pathname);
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       // Check if this is a password recovery event
       if (event === 'PASSWORD_RECOVERY') {
         setUpdatePasswordMode(true);
-      } else if (session && !updatePasswordMode && type !== 'recovery') {
+      } else if (session && !updatePasswordMode && type !== 'recovery' && type !== 'signup') {
         navigate("/");
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session && !updatePasswordMode && type !== 'recovery') {
+      if (session && !updatePasswordMode && type !== 'recovery' && type !== 'signup') {
         navigate("/");
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, updatePasswordMode]);
+  }, [navigate, updatePasswordMode, toast]);
 
   const generatePassword = () => {
     const length = 16;
@@ -373,11 +383,11 @@ const Auth = () => {
         <CardHeader>
           <CardTitle className="text-2xl text-center">Productivity Toolkit</CardTitle>
           <CardDescription className="text-center">
-            Sign in or create an account to get started
+            {emailConfirmed ? "Email verified! Please sign in below." : "Sign in or create an account to get started"}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs defaultValue={emailConfirmed ? "signin" : "signin"} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
