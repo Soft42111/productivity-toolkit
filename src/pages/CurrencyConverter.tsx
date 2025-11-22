@@ -14,7 +14,28 @@ const CurrencyConverter = () => {
   const [rate, setRate] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const currencies = ["USD", "EUR", "GBP", "JPY", "AUD", "CAD", "CHF", "CNY", "INR", "MXN"];
+  const currencies = [
+    { code: "USD", name: "United States" },
+    { code: "EUR", name: "European Union" },
+    { code: "GBP", name: "United Kingdom" },
+    { code: "JPY", name: "Japan" },
+    { code: "AUD", name: "Australia" },
+    { code: "CAD", name: "Canada" },
+    { code: "CHF", name: "Switzerland" },
+    { code: "CNY", name: "China" },
+    { code: "INR", name: "India" },
+    { code: "MXN", name: "Mexico" },
+    { code: "BRL", name: "Brazil" },
+    { code: "KRW", name: "South Korea" },
+    { code: "SGD", name: "Singapore" },
+    { code: "HKD", name: "Hong Kong" },
+    { code: "NOK", name: "Norway" },
+    { code: "SEK", name: "Sweden" },
+    { code: "DKK", name: "Denmark" },
+    { code: "PLN", name: "Poland" },
+    { code: "THB", name: "Thailand" },
+    { code: "ZAR", name: "South Africa" },
+  ];
 
   const convert = async () => {
     try {
@@ -68,10 +89,10 @@ const CurrencyConverter = () => {
                   <SelectTrigger className="h-14 text-lg">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover z-50">
                     {currencies.map((curr) => (
-                      <SelectItem key={curr} value={curr} className="text-lg">
-                        {curr}
+                      <SelectItem key={curr.code} value={curr.code} className="text-lg">
+                        {curr.name} - {curr.code}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -90,10 +111,10 @@ const CurrencyConverter = () => {
                   <SelectTrigger className="h-14 text-lg">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-popover z-50">
                     {currencies.map((curr) => (
-                      <SelectItem key={curr} value={curr} className="text-lg">
-                        {curr}
+                      <SelectItem key={curr.code} value={curr.code} className="text-lg">
+                        {curr.name} - {curr.code}
                       </SelectItem>
                     ))}
                   </SelectContent>
