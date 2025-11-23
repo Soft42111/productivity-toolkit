@@ -313,7 +313,7 @@ export type Database = {
           code: string
           created_at: string
           expires_at: string
-          id: number
+          id: string
           user_id: string
           verified: boolean
         }[]
