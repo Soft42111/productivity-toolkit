@@ -15,7 +15,6 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const verificationCode = searchParams.get("code");
   const userId = searchParams.get("userId");
 
   useEffect(() => {
@@ -86,25 +85,10 @@ const VerifyEmail = () => {
             Verify Your Email
           </CardTitle>
           <CardDescription className="text-base">
-            Enter the verification code shown after signup
+            Enter the 6-digit code sent to your email
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {verificationCode && (
-            <div className="mb-6 p-4 rounded-lg bg-primary/10 border-2 border-primary/30">
-              <div className="flex items-center gap-2 mb-2">
-                <AlertCircle className="w-5 h-5 text-primary" />
-                <p className="font-semibold text-primary">Your Verification Code:</p>
-              </div>
-              <p className="text-3xl font-mono font-bold text-center tracking-wider text-primary">
-                {verificationCode}
-              </p>
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Code expires in 15 minutes
-              </p>
-            </div>
-          )}
-
           <form onSubmit={handleVerify} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="code">Verification Code</Label>
