@@ -15,6 +15,21 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for OAuth errors in URL
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+    
+    if (error) {
+      toast({
+        title: "Authentication Error",
+        description: errorDescription || error,
+        variant: "destructive",
+      });
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
@@ -34,7 +49,7 @@ const Auth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, toast]);
 
   const handleSignInWithGoogle = async () => {
     try {
