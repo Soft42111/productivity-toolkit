@@ -16,6 +16,7 @@ const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showVerificationMessage, setShowVerificationMessage] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -82,11 +83,11 @@ const Auth = () => {
 
         if (error) throw error;
 
+        setShowVerificationMessage(true);
         toast({
-          title: "Account created!",
-          description: "You can now sign in with your credentials",
+          title: "Check your email!",
+          description: "We've sent you a verification link",
         });
-        setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
@@ -130,7 +131,37 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleAuth} className="space-y-4">
+          {showVerificationMessage ? (
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <svg className="w-8 h-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Check your email</h3>
+                <p className="text-muted-foreground mb-4">
+                  We've sent a verification link to <strong>{email}</strong>
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Click the link in the email to verify your account and start using Power Tools.
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowVerificationMessage(false);
+                  setEmail("");
+                  setPassword("");
+                  setIsSignUp(false);
+                }}
+              >
+                Back to Sign In
+              </Button>
+            </div>
+          ) : (
+            <form onSubmit={handleAuth} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -182,6 +213,7 @@ const Auth = () => {
               </Button>
             </div>
           </form>
+          )}
         </CardContent>
       </Card>
     </div>
