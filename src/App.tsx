@@ -13,6 +13,7 @@ import UnitConverter from "./pages/UnitConverter";
 import PasswordGenerator from "./pages/PasswordGenerator";
 import ChatGemini from "./pages/ChatGemini";
 import Auth from "./pages/Auth";
+import VerifyEmail from "./pages/VerifyEmail";
 import NotFound from "./pages/NotFound";
 import QRCodeGenerator from "./pages/QRCodeGenerator";
 import NotesApp from "./pages/NotesApp";
@@ -76,6 +77,7 @@ const App = () => (
           <Route path="/voice-recorder" element={<VoiceRecorder />} />
           <Route path="/link-shortener" element={<LinkShortener />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
