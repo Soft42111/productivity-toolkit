@@ -72,7 +72,7 @@ const Auth = () => {
       setLoading(true);
 
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -82,11 +82,30 @@ const Auth = () => {
 
         if (error) throw error;
 
-        toast({
-          title: "Account created!",
-          description: "You can now sign in with your credentials",
-        });
-        setIsSignUp(false);
+        if (signUpData.user) {
+          // Generate 6-digit code
+          const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+          const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
+
+          // Store verification code
+          const { error: codeError } = await supabase.rpc('insert_verification_code', {
+            p_user_id: signUpData.user.id,
+            p_code: verificationCode,
+            p_expires_at: expiresAt,
+          });
+
+          if (codeError) {
+            console.error("Error storing verification code:", codeError);
+          }
+
+          // Redirect to verification page with code shown
+          navigate(`/verify-email?code=${verificationCode}&userId=${signUpData.user.id}`);
+          
+          toast({
+            title: "Account created!",
+            description: "Please verify your email with the code shown",
+          });
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
