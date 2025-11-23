@@ -87,7 +87,7 @@ const Auth = () => {
           const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
           const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
-          // Store verification code
+          // Store verification code in database
           const { error: codeError } = await supabase.rpc('insert_verification_code', {
             p_user_id: signUpData.user.id,
             p_code: verificationCode,
@@ -96,14 +96,28 @@ const Auth = () => {
 
           if (codeError) {
             console.error("Error storing verification code:", codeError);
+            throw codeError;
           }
 
-          // Redirect to verification page with code shown
-          navigate(`/verify-email?code=${verificationCode}&userId=${signUpData.user.id}`);
+          // Send verification email
+          const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+            body: {
+              email,
+              code: verificationCode,
+            },
+          });
+
+          if (emailError) {
+            console.error("Error sending verification email:", emailError);
+            throw emailError;
+          }
+
+          // Redirect to verification page
+          navigate(`/verify-email?userId=${signUpData.user.id}`);
           
           toast({
-            title: "Account created!",
-            description: "Please verify your email with the code shown",
+            title: "Verification email sent!",
+            description: "Check your inbox for the verification code",
           });
         }
       } else {
