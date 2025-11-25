@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import Beams from "@/components/Beams";
+import InteractiveParticles from "@/components/InteractiveParticles";
+import CodeTabs from "@/components/CodeTabs";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
 import { 
@@ -162,9 +165,11 @@ const Index = () => {
   const otherApps = allApps.filter(app => !app.isBest);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <div className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-        <div className="flex justify-between items-center mb-12">
+    <div className="min-h-screen bg-background flex flex-col relative">
+      <Beams />
+      <InteractiveParticles />
+      <div className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full relative z-10">
+        <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-foreground tracking-tight">
             Power Tools
           </h1>
@@ -182,6 +187,10 @@ const Index = () => {
               </Button>
             )}
           </div>
+        </div>
+
+        <div className="mb-12">
+          <CodeTabs />
         </div>
 
         {pinnedAppsList.length > 0 && (
