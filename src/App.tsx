@@ -40,6 +40,7 @@ import IslamicStudies from "./pages/IslamicStudies";
 import IslamicReminders from "./pages/IslamicReminders";
 import QiblaCompass from "./pages/QiblaCompass";
 import IslamicCalendar from "./pages/IslamicCalendar";
+import FounderNote from "./pages/FounderNote";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const App = () => (
           <Route path="/islamic-reminders" element={<IslamicReminders />} />
           <Route path="/qibla-compass" element={<QiblaCompass />} />
           <Route path="/islamic-calendar" element={<IslamicCalendar />} />
+          <Route path="/founder-note" element={<FounderNote />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

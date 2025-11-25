@@ -117,6 +117,7 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-weight: 500;
     font-feature-settings: "cv11", "ss01";
     font-variation-settings: "opsz" auto;
   }

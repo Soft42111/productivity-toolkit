@@ -205,6 +205,9 @@ const Index = () => {
                 <button onClick={() => scrollToSection("all-tools")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                   All Tools
                 </button>
+                <Link to="/founder-note" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Founder's Note
+                </Link>
               </nav>
             </div>
             <div className="flex items-center gap-4">
