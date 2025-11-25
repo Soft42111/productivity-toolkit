@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +8,6 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, DollarSign } from "lucide-react";
-import type { User } from '@supabase/supabase-js';
 
 interface Expense {
   id: string;
@@ -18,82 +15,45 @@ interface Expense {
   category: string;
   description: string;
   date: string;
-  user_id: string;
 }
 
 const ExpenseTracker = () => {
-  const [user, setUser] = useState<User | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("food");
   const [description, setDescription] = useState("");
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const categories = ["food", "transport", "entertainment", "utilities", "shopping", "health", "other"];
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-      else fetchExpenses();
-    });
+    const saved = localStorage.getItem("expenses");
+    if (saved) setExpenses(JSON.parse(saved));
+  }, []);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-    });
+  useEffect(() => {
+    localStorage.setItem("expenses", JSON.stringify(expenses));
+  }, [expenses]);
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  const addExpense = () => {
+    if (!amount || !description) return;
 
-  const fetchExpenses = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("expenses")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("date", { ascending: false });
-
-    if (!error && data) setExpenses(data);
+    const newExpense = {
+      id: Date.now().toString(),
+      amount: parseFloat(amount),
+      category,
+      description,
+      date: new Date().toISOString()
+    };
+    setExpenses([newExpense, ...expenses]);
+    setAmount("");
+    setDescription("");
+    toast({ title: "Expense added", description: "Your expense has been recorded." });
   };
 
-  const addExpense = async () => {
-    if (!user || !amount || !description) return;
-
-    const { data, error } = await supabase
-      .from("expenses")
-      .insert([{
-        amount: parseFloat(amount),
-        category,
-        description,
-        date: new Date().toISOString(),
-        user_id: user.id
-      }])
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setExpenses([data, ...expenses]);
-      setAmount("");
-      setDescription("");
-      toast({ title: "Expense added", description: "Your expense has been recorded." });
-    }
-  };
-
-  const deleteExpense = async (id: string) => {
-    const { error } = await supabase.from("expenses").delete().eq("id", id);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setExpenses(expenses.filter(e => e.id !== id));
-      toast({ title: "Expense deleted" });
-    }
+  const deleteExpense = (id: string) => {
+    setExpenses(expenses.filter(e => e.id !== id));
+    toast({ title: "Expense deleted" });
   };
 
   const totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
