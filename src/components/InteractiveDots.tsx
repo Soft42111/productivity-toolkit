@@ -78,6 +78,7 @@ const InteractiveDots = () => {
       const springForce = 0.08;
       const damping = 0.90;
 
+      // First pass: cursor interaction
       dotsRef.current.forEach((dot) => {
         if (mouse.isActive) {
           const dx = dot.x - mouse.x;
@@ -92,7 +93,39 @@ const InteractiveDots = () => {
             dot.vy += Math.sin(angle) * force;
           }
         }
+      });
 
+      // Second pass: wave propagation between neighbors
+      const neighborRadius = window.innerWidth < 768 ? 60 : 70;
+      const propagationForce = 0.15;
+
+      dotsRef.current.forEach((dot, index) => {
+        // Check if this dot is significantly displaced
+        const displacement = Math.sqrt(
+          Math.pow(dot.x - dot.originalX, 2) + Math.pow(dot.y - dot.originalY, 2)
+        );
+
+        if (displacement > 2) {
+          // This dot is moving, push nearby dots
+          dotsRef.current.forEach((neighbor, neighborIndex) => {
+            if (index === neighborIndex) return;
+
+            const dx = neighbor.x - dot.x;
+            const dy = neighbor.y - dot.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < neighborRadius && distance > 0) {
+              const force = Math.pow((neighborRadius - distance) / neighborRadius, 2) * propagationForce;
+              const angle = Math.atan2(dy, dx);
+              neighbor.vx += Math.cos(angle) * force;
+              neighbor.vy += Math.sin(angle) * force;
+            }
+          });
+        }
+      });
+
+      // Third pass: apply physics
+      dotsRef.current.forEach((dot) => {
         // Gentle spring back
         const dx = dot.originalX - dot.x;
         const dy = dot.originalY - dot.y;
