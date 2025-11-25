@@ -3,19 +3,18 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Loader2, Book, BookOpen, FileText } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Loader2, Book, BookOpen, FileText, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export default function IslamicStudies() {
-  const [sunnahQuery, setSunnahQuery] = useState("");
-  const [hadithQuery, setHadithQuery] = useState("");
-  const [quranQuery, setQuranQuery] = useState("");
-  
   const [sunnahResponse, setSunnahResponse] = useState("");
   const [hadithResponse, setHadithResponse] = useState("");
   const [quranResponse, setQuranResponse] = useState("");
@@ -24,14 +23,70 @@ export default function IslamicStudies() {
   const [loadingHadith, setLoadingHadith] = useState(false);
   const [loadingQuran, setLoadingQuran] = useState(false);
 
-  const searchSunnah = async () => {
-    if (!sunnahQuery.trim()) {
-      toast.error("Please enter a topic to search");
-      return;
+  const sunnahTopics = [
+    "kindness and compassion",
+    "prayer and worship",
+    "charity and helping others",
+    "patience and perseverance",
+    "honesty and truthfulness",
+    "family relations",
+    "seeking knowledge",
+    "good manners",
+    "remembrance of Allah",
+    "justice and fairness"
+  ];
+
+  const hadithTopics = [
+    "faith and belief",
+    "the importance of prayer",
+    "excellence in character",
+    "seeking knowledge",
+    "being good to parents",
+    "charity",
+    "patience in hardship",
+    "truthfulness",
+    "brotherhood in Islam",
+    "fasting"
+  ];
+
+  const quranTopics = [
+    "mercy of Allah",
+    "patience and gratitude",
+    "guidance and wisdom",
+    "the importance of prayer",
+    "charity and helping others",
+    "justice",
+    "knowledge",
+    "faith and trust in Allah",
+    "family and relationships",
+    "forgiveness"
+  ];
+
+  const getRandomTopic = (topics: string[]) => {
+    return topics[Math.floor(Math.random() * topics.length)];
+  };
+
+  const fetchIslamicContent = async (type: "sunnah" | "hadith" | "quran") => {
+    let query = "";
+    let setLoading: (loading: boolean) => void;
+    let setResponse: (response: string) => void;
+
+    if (type === "sunnah") {
+      query = getRandomTopic(sunnahTopics);
+      setLoading = setLoadingSunnah;
+      setResponse = setSunnahResponse;
+    } else if (type === "hadith") {
+      query = getRandomTopic(hadithTopics);
+      setLoading = setLoadingHadith;
+      setResponse = setHadithResponse;
+    } else {
+      query = getRandomTopic(quranTopics);
+      setLoading = setLoadingQuran;
+      setResponse = setQuranResponse;
     }
 
-    setLoadingSunnah(true);
-    setSunnahResponse("");
+    setLoading(true);
+    setResponse("");
 
     try {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/islamic-search`, {
@@ -41,95 +96,55 @@ export default function IslamicStudies() {
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
-          type: "sunnah",
-          query: sunnahQuery,
+          type: type,
+          query: `Give me exactly ONE ${type} about ${query}. Format the response with bold text for the main title/reference. Keep it concise - just one ${type} with its reference.`,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to search Sunnah");
+        throw new Error(`Failed to fetch ${type}`);
       }
 
       const data = await response.json();
-      setSunnahResponse(data.text);
+      
+      // Format the response to make references bold
+      let formattedText = data.text;
+      
+      // Make references bold (patterns like "Sahih Bukhari", "Surah", etc.)
+      formattedText = formattedText.replace(/(Sahih\s+(?:Bukhari|Muslim|Abu\s+Dawud|Tirmidhi|An-Nasa'i|Ibn\s+Majah)[^,\n]*)/gi, "**$1**");
+      formattedText = formattedText.replace(/(Surah\s+[A-Za-z-]+(?:\s+\([^)]+\))?[^,\n]*)/gi, "**$1**");
+      formattedText = formattedText.replace(/(Book\s+\d+[^,\n]*)/gi, "**$1**");
+      formattedText = formattedText.replace(/(Hadith\s+\d+[^,\n]*)/gi, "**$1**");
+      formattedText = formattedText.replace(/(Verse\s+\d+[^,\n]*)/gi, "**$1**");
+      formattedText = formattedText.replace(/(\d+:\d+(?:-\d+)?)/g, "**$1**");
+      
+      setResponse(formattedText);
     } catch (error) {
-      console.error("Error searching Sunnah:", error);
-      toast.error("Failed to search Sunnah");
+      console.error(`Error fetching ${type}:`, error);
+      toast.error(`Failed to fetch ${type}`);
+      setResponse(`Error loading ${type}. Please try again.`);
     } finally {
-      setLoadingSunnah(false);
+      setLoading(false);
     }
   };
 
-  const searchHadith = async () => {
-    if (!hadithQuery.trim()) {
-      toast.error("Please enter a topic to search");
-      return;
-    }
+  const renderFormattedText = (text: string) => {
+    if (!text) return null;
 
-    setLoadingHadith(true);
-    setHadithResponse("");
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/islamic-search`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          type: "hadith",
-          query: hadithQuery,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to search Hadith");
-      }
-
-      const data = await response.json();
-      setHadithResponse(data.text);
-    } catch (error) {
-      console.error("Error searching Hadith:", error);
-      toast.error("Failed to search Hadith");
-    } finally {
-      setLoadingHadith(false);
-    }
-  };
-
-  const searchQuran = async () => {
-    if (!quranQuery.trim()) {
-      toast.error("Please enter a verse or topic to search");
-      return;
-    }
-
-    setLoadingQuran(true);
-    setQuranResponse("");
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/islamic-search`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          type: "quran",
-          query: quranQuery,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to search Quran");
-      }
-
-      const data = await response.json();
-      setQuranResponse(data.text);
-    } catch (error) {
-      console.error("Error searching Quran:", error);
-      toast.error("Failed to search Quran");
-    } finally {
-      setLoadingQuran(false);
-    }
+    // Split by bold markers and render
+    const parts = text.split(/\*\*(.+?)\*\*/g);
+    
+    return (
+      <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
+        {parts.map((part, index) => {
+          // Even indices are normal text, odd indices are bold
+          if (index % 2 === 1) {
+            return <strong key={index} className="text-primary font-bold">{part}</strong>;
+          }
+          return <span key={index}>{part}</span>;
+        })}
+      </div>
+    );
   };
 
   return (
@@ -141,7 +156,7 @@ export default function IslamicStudies() {
               ← Back to Home
             </Link>
             <h1 className="text-4xl font-bold text-foreground mb-2">Islamic Studies</h1>
-            <p className="text-muted-foreground">Explore Sunnah, Hadith, and Quran translations with references</p>
+            <p className="text-muted-foreground">Discover random Sunnah, Hadith, and Quran verses with references</p>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/islamic-reminders">
@@ -174,38 +189,32 @@ export default function IslamicStudies() {
               <CardHeader>
                 <CardTitle>Sunnah of Prophet Muhammad (PBUH)</CardTitle>
                 <CardDescription>
-                  Search for Sunnah practices with authentic references
+                  Click the button to discover a random Sunnah practice with authentic references
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="Enter a topic (e.g., prayer, charity, fasting)..."
-                    value={sunnahQuery}
-                    onChange={(e) => setSunnahQuery(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                  <Button 
-                    onClick={searchSunnah} 
-                    disabled={loadingSunnah}
-                    className="w-full"
-                  >
-                    {loadingSunnah ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Searching...
-                      </>
-                    ) : (
-                      "Search Sunnah"
-                    )}
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => fetchIslamicContent("sunnah")} 
+                  disabled={loadingSunnah}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loadingSunnah ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Shuffle className="mr-2 h-5 w-5" />
+                      Get Random Sunnah
+                    </>
+                  )}
+                </Button>
 
                 {sunnahResponse && (
-                  <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-                    <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
-                      {sunnahResponse}
-                    </div>
+                  <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+                    {renderFormattedText(sunnahResponse)}
                   </ScrollArea>
                 )}
               </CardContent>
@@ -217,38 +226,32 @@ export default function IslamicStudies() {
               <CardHeader>
                 <CardTitle>Hadith Translation</CardTitle>
                 <CardDescription>
-                  Search for Hadith with translations and references
+                  Click the button to discover a random Hadith with translation and references
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="Enter a topic or Hadith number (e.g., kindness, Bukhari 1)..."
-                    value={hadithQuery}
-                    onChange={(e) => setHadithQuery(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                  <Button 
-                    onClick={searchHadith} 
-                    disabled={loadingHadith}
-                    className="w-full"
-                  >
-                    {loadingHadith ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Searching...
-                      </>
-                    ) : (
-                      "Search Hadith"
-                    )}
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => fetchIslamicContent("hadith")} 
+                  disabled={loadingHadith}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loadingHadith ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Shuffle className="mr-2 h-5 w-5" />
+                      Get Random Hadith
+                    </>
+                  )}
+                </Button>
 
                 {hadithResponse && (
-                  <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-                    <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
-                      {hadithResponse}
-                    </div>
+                  <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+                    {renderFormattedText(hadithResponse)}
                   </ScrollArea>
                 )}
               </CardContent>
@@ -260,38 +263,32 @@ export default function IslamicStudies() {
               <CardHeader>
                 <CardTitle>Quran Translation</CardTitle>
                 <CardDescription>
-                  Search for Quran verses with translations and references
+                  Click the button to discover a random Quran verse with translation and references
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Textarea
-                    placeholder="Enter a verse reference (e.g., Surah Al-Fatiha, 2:255) or topic..."
-                    value={quranQuery}
-                    onChange={(e) => setQuranQuery(e.target.value)}
-                    className="min-h-[100px]"
-                  />
-                  <Button 
-                    onClick={searchQuran} 
-                    disabled={loadingQuran}
-                    className="w-full"
-                  >
-                    {loadingQuran ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Searching...
-                      </>
-                    ) : (
-                      "Search Quran"
-                    )}
-                  </Button>
-                </div>
+                <Button 
+                  onClick={() => fetchIslamicContent("quran")} 
+                  disabled={loadingQuran}
+                  className="w-full"
+                  size="lg"
+                >
+                  {loadingQuran ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Shuffle className="mr-2 h-5 w-5" />
+                      Get Random Quran Verse
+                    </>
+                  )}
+                </Button>
 
                 {quranResponse && (
-                  <ScrollArea className="h-[400px] w-full rounded-md border p-4">
-                    <div className="prose dark:prose-invert max-w-none whitespace-pre-wrap">
-                      {quranResponse}
-                    </div>
+                  <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+                    {renderFormattedText(quranResponse)}
                   </ScrollArea>
                 )}
               </CardContent>

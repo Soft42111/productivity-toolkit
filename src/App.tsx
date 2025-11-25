@@ -38,6 +38,8 @@ import VoiceRecorder from "./pages/VoiceRecorder";
 import LinkShortener from "./pages/LinkShortener";
 import IslamicStudies from "./pages/IslamicStudies";
 import IslamicReminders from "./pages/IslamicReminders";
+import QiblaCompass from "./pages/QiblaCompass";
+import IslamicCalendar from "./pages/IslamicCalendar";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +82,8 @@ const App = () => (
           <Route path="/link-shortener" element={<LinkShortener />} />
           <Route path="/islamic-studies" element={<IslamicStudies />} />
           <Route path="/islamic-reminders" element={<IslamicReminders />} />
+          <Route path="/qibla-compass" element={<QiblaCompass />} />
+          <Route path="/islamic-calendar" element={<IslamicCalendar />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
