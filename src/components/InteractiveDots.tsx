@@ -34,7 +34,7 @@ const InteractiveDots = () => {
 
     const initDots = () => {
       const isMobile = window.innerWidth < 768;
-      const spacing = isMobile ? 40 : 25; // Larger spacing on mobile for performance
+      const spacing = isMobile ? 35 : 20; // Tighter spacing for more dots
       const cols = Math.ceil(window.innerWidth / spacing);
       const rows = Math.ceil(window.innerHeight / spacing);
 
@@ -59,10 +59,10 @@ const InteractiveDots = () => {
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       const mouse = mouseRef.current;
-      const interactionRadius = window.innerWidth < 768 ? 80 : 120;
-      const repelForce = 0.4;
-      const springForce = 0.08;
-      const damping = 0.92;
+      const interactionRadius = window.innerWidth < 768 ? 100 : 150;
+      const repelForce = 0.6;
+      const springForce = 0.12;
+      const damping = 0.88;
 
       dotsRef.current.forEach((dot) => {
         if (mouse.isActive) {
@@ -89,13 +89,18 @@ const InteractiveDots = () => {
         dot.x += dot.vx;
         dot.y += dot.vy;
 
-        // Draw dot
-        ctx.fillStyle = getComputedStyle(document.documentElement)
-          .getPropertyValue("--muted-foreground")
-          .trim() || "hsl(215 20% 65%)";
-        ctx.globalAlpha = 0.15;
+        // Calculate distance from original position for fade effect
+        const distFromOrigin = Math.sqrt(
+          Math.pow(dot.x - dot.originalX, 2) + Math.pow(dot.y - dot.originalY, 2)
+        );
+        const maxDist = 50;
+        const fadeAmount = Math.min(distFromOrigin / maxDist, 1);
+
+        // Draw dot with dynamic size and opacity
+        ctx.fillStyle = "#64748b"; // Slate color for visibility
+        ctx.globalAlpha = 0.25 + fadeAmount * 0.15;
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 1.5, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, 2 + fadeAmount * 0.5, 0, Math.PI * 2);
         ctx.fill();
       });
 
@@ -177,8 +182,8 @@ const InteractiveDots = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-0"
-      style={{ isolation: "isolate" }}
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex: 1 }}
     />
   );
 };
