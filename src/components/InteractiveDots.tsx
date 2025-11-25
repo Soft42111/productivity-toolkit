@@ -73,10 +73,10 @@ const InteractiveDots = () => {
       );
       const velocityDamping = Math.min(1, 5 / Math.max(cursorVelocity, 5));
       
-      const interactionRadius = window.innerWidth < 768 ? 80 : 100;
-      const repelForce = 0.3 * velocityDamping;
+      const interactionRadius = window.innerWidth < 768 ? 100 : 120;
+      const repelForce = 0.6 * velocityDamping;
       const springForce = 0.08;
-      const damping = 0.92;
+      const damping = 0.90;
 
       dotsRef.current.forEach((dot) => {
         if (mouse.isActive) {
