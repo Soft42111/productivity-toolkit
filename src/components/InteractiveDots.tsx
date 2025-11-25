@@ -114,7 +114,7 @@ const InteractiveDots = () => {
         ctx.fillStyle = dotColor;
         ctx.globalAlpha = 0.3 + fadeAmount * 0.2;
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 4 + fadeAmount * 1, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, 1.5, 0, Math.PI * 2);
         ctx.fill();
       });
 
