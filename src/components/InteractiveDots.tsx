@@ -105,6 +105,16 @@ const InteractiveDots = () => {
         dot.x += dot.vx;
         dot.y += dot.vy;
 
+        // Calculate velocity for color shift
+        const velocity = Math.sqrt(dot.vx * dot.vx + dot.vy * dot.vy);
+        const maxVelocity = 10;
+        const velocityRatio = Math.min(velocity / maxVelocity, 1);
+        
+        // Map velocity to hue (0-360 degrees for rainbow effect)
+        const hue = velocityRatio * 280; // 0 = red/white, 280 = blue/purple
+        const saturation = velocityRatio * 70; // More saturated when moving faster
+        const lightness = 90 - velocityRatio * 20; // Slightly darker when moving
+        
         // Calculate distance from original position for glow effect
         const distFromOrigin = Math.sqrt(
           Math.pow(dot.x - dot.originalX, 2) + Math.pow(dot.y - dot.originalY, 2)
@@ -112,13 +122,13 @@ const InteractiveDots = () => {
         const maxDist = 60;
         const glowAmount = Math.min(distFromOrigin / maxDist, 1);
 
-        // Draw dot with glow effect
-        ctx.fillStyle = "#ffffff";
-        ctx.globalAlpha = 0.4 + glowAmount * 0.3;
+        // Draw dot with velocity-based color and subtle glow
+        ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        ctx.globalAlpha = 0.5 + glowAmount * 0.2;
         
-        // Add glow
-        ctx.shadowColor = "#ffffff";
-        ctx.shadowBlur = 8 + glowAmount * 12;
+        // Add subtle glow
+        ctx.shadowColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+        ctx.shadowBlur = 3 + glowAmount * 4;
         
         ctx.beginPath();
         ctx.arc(dot.x, dot.y, 2, 0, Math.PI * 2);
