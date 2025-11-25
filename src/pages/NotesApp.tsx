@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +8,6 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Save, FileText } from "lucide-react";
-import type { User } from '@supabase/supabase-js';
 
 interface Note {
   id: string;
@@ -21,57 +18,51 @@ interface Note {
 }
 
 const NotesApp = () => {
-  const [user, setUser] = useState<User | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Temporarily disabled authentication
-    fetchNotes();
+    const saved = localStorage.getItem("notes");
+    if (saved) setNotes(JSON.parse(saved));
   }, []);
 
-  const fetchNotes = async () => {
-    // Temporarily disabled - would fetch user notes
-    setNotes([]);
-  };
+  useEffect(() => {
+    localStorage.setItem("notes", JSON.stringify(notes));
+  }, [notes]);
 
-  const createNote = async () => {
+  const createNote = () => {
     if (!title.trim()) return;
 
-    // Temporarily disabled - create note locally only
     const newNote = {
-      id: Math.random().toString(),
+      id: Date.now().toString(),
       title,
       content,
       created_at: new Date().toISOString(),
-      user_id: "temp"
+      user_id: "local"
     };
     setNotes([newNote, ...notes]);
     setSelectedNote(newNote);
-    toast({ title: "Note created", description: "Your note has been saved locally." });
+    toast({ title: "Note created", description: "Your note has been saved." });
   };
 
-  const updateNote = async () => {
+  const updateNote = () => {
     if (!selectedNote) return;
 
-    // Temporarily disabled - update note locally only
     setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, title, content } : n));
-    toast({ title: "Note updated", description: "Your changes have been saved locally." });
+    toast({ title: "Note updated", description: "Your changes have been saved." });
   };
 
-  const deleteNote = async (id: string) => {
-    // Temporarily disabled - delete note locally only
+  const deleteNote = (id: string) => {
     setNotes(notes.filter(n => n.id !== id));
     if (selectedNote?.id === id) {
       setSelectedNote(null);
       setTitle("");
       setContent("");
     }
-    toast({ title: "Note deleted", description: "Your note has been removed locally." });
+    toast({ title: "Note deleted", description: "Your note has been removed." });
   };
 
   const selectNote = (note: Note) => {

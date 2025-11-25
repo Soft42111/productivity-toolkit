@@ -1,6 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,97 +8,57 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Target } from "lucide-react";
-import type { User } from '@supabase/supabase-js';
 
 interface Habit {
   id: string;
   name: string;
   completed_today: boolean;
   streak: number;
-  user_id: string;
   created_at: string;
   updated_at: string;
 }
 
 const HabitTracker = () => {
-  const [user, setUser] = useState<User | null>(null);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [newHabit, setNewHabit] = useState("");
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-      else fetchHabits();
-    });
+    const saved = localStorage.getItem("habits");
+    if (saved) setHabits(JSON.parse(saved));
+  }, []);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-    });
+  useEffect(() => {
+    localStorage.setItem("habits", JSON.stringify(habits));
+  }, [habits]);
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  const addHabit = () => {
+    if (!newHabit.trim()) return;
 
-  const fetchHabits = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("habits")
-      .select("*")
-      .eq("user_id", user.id);
-
-    if (!error && data) setHabits(data);
+    const newHabitObj = {
+      id: Date.now().toString(),
+      name: newHabit,
+      completed_today: false,
+      streak: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    setHabits([...habits, newHabitObj]);
+    setNewHabit("");
+    toast({ title: "Habit added!" });
   };
 
-  const addHabit = async () => {
-    if (!user || !newHabit.trim()) return;
-
-    const { data, error } = await supabase
-      .from("habits")
-      .insert([{ name: newHabit, user_id: user.id, completed_today: false, streak: 0 }])
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setHabits([...habits, data]);
-      setNewHabit("");
-      toast({ title: "Habit added!" });
-    }
-  };
-
-  const toggleHabit = async (id: string, completed: boolean) => {
+  const toggleHabit = (id: string, completed: boolean) => {
     const habit = habits.find(h => h.id === id);
     if (!habit) return;
 
     const newStreak = completed ? habit.streak + 1 : 0;
-
-    const { error } = await supabase
-      .from("habits")
-      .update({ completed_today: completed, streak: newStreak })
-      .eq("id", id);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setHabits(habits.map(h => h.id === id ? { ...h, completed_today: completed, streak: newStreak } : h));
-    }
+    setHabits(habits.map(h => h.id === id ? { ...h, completed_today: completed, streak: newStreak, updated_at: new Date().toISOString() } : h));
   };
 
-  const deleteHabit = async (id: string) => {
-    const { error } = await supabase.from("habits").delete().eq("id", id);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setHabits(habits.filter(h => h.id !== id));
-      toast({ title: "Habit deleted" });
-    }
+  const deleteHabit = (id: string) => {
+    setHabits(habits.filter(h => h.id !== id));
+    toast({ title: "Habit deleted" });
   };
 
   return (
