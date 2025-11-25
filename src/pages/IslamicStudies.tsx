@@ -139,7 +139,7 @@ export default function IslamicStudies() {
         {parts.map((part, index) => {
           // Even indices are normal text, odd indices are bold
           if (index % 2 === 1) {
-            return <strong key={index} className="text-primary font-bold">{part}</strong>;
+            return <strong key={index} className="font-bold text-foreground bg-muted px-1 py-0.5 rounded">{part}</strong>;
           }
           return <span key={index}>{part}</span>;
         })}
