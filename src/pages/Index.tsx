@@ -53,6 +53,7 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [pinnedApps, setPinnedApps] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [scrollY, setScrollY] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -74,6 +75,14 @@ const Index = () => {
     });
 
     return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const fetchPinnedApps = async () => {
@@ -189,18 +198,31 @@ const Index = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-24 flex-1 w-full relative z-10">
         {/* Introduction */}
-        <div className="mb-24 text-center max-w-3xl mx-auto space-y-8">
-          <h2 className="text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
+        <div className="mb-24 text-center max-w-3xl mx-auto space-y-8 relative">
+          <div 
+            className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/20 via-accent/10 to-transparent rounded-full blur-3xl pointer-events-none"
+            style={{ transform: `translate(-50%, ${scrollY * 0.3}px)` }}
+          />
+          <h2 
+            className="text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight relative"
+            style={{ transform: `translateY(${scrollY * 0.1}px)` }}
+          >
             Essential tools for
             <span className="block text-gradient bg-gradient-to-r from-accent to-primary">modern workflows</span>
           </h2>
-          <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+          <p 
+            className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto relative"
+            style={{ transform: `translateY(${scrollY * 0.15}px)` }}
+          >
             Streamline your daily tasks with a curated collection of productivity tools.
             Fast, simple, and always accessible.
           </p>
           
           {/* Search - How do I find what I need? */}
-          <div className="max-w-md mx-auto pt-4">
+          <div 
+            className="max-w-md mx-auto pt-4 relative"
+            style={{ transform: `translateY(${scrollY * 0.05}px)` }}
+          >
             <div className="relative group">
               <input
                 type="text"
