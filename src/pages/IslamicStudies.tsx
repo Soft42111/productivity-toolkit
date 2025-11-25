@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -136,10 +137,20 @@ export default function IslamicStudies() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
+            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">
+              ← Back to Home
+            </Link>
             <h1 className="text-4xl font-bold text-foreground mb-2">Islamic Studies</h1>
             <p className="text-muted-foreground">Explore Sunnah, Hadith, and Quran translations with references</p>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center gap-4">
+            <Link to="/islamic-reminders">
+              <Button variant="outline">
+                Prayer Reminders
+              </Button>
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
 
         <Tabs defaultValue="sunnah" className="w-full">

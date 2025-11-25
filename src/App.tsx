@@ -37,6 +37,7 @@ import CurrencyConverter from "./pages/CurrencyConverter";
 import VoiceRecorder from "./pages/VoiceRecorder";
 import LinkShortener from "./pages/LinkShortener";
 import IslamicStudies from "./pages/IslamicStudies";
+import IslamicReminders from "./pages/IslamicReminders";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const App = () => (
           <Route path="/voice-recorder" element={<VoiceRecorder />} />
           <Route path="/link-shortener" element={<LinkShortener />} />
           <Route path="/islamic-studies" element={<IslamicStudies />} />
+          <Route path="/islamic-reminders" element={<IslamicReminders />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
