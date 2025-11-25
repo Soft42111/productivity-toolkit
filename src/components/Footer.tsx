@@ -6,7 +6,7 @@ const Footer = () => {
           <p className="text-sm text-white">
             © {new Date().getFullYear()} Power Tools. Crafted for productivity.
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-white">
             Made with precision and care
           </p>
         </div>
