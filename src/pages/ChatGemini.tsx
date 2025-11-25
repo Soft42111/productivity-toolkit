@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, ArrowLeft, Sparkles, Copy, Check } from "lucide-react";
+import { Send, Sparkles, Copy, Check } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import ThemeToggle from "@/components/ThemeToggle";
+import HomeButton from "@/components/HomeButton";
 
 interface Message {
   role: "user" | "assistant";
@@ -84,14 +85,9 @@ const ChatGemini = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <HomeButton />
       <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col p-4">
-        <div className="flex items-center justify-between mb-6">
-          <Link to="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+        <div className="flex items-center justify-end mb-6">
           <ThemeToggle />
         </div>
 

@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Mic, Square, Download, Trash2 } from "lucide-react";
+import HomeButton from "@/components/HomeButton";
+import ThemeToggle from "@/components/ThemeToggle";
+import Footer from "@/components/Footer";
 
 const VoiceRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -80,6 +83,10 @@ const VoiceRecorder = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 p-6">
+      <HomeButton />
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       <div className="max-w-2xl mx-auto">
         <Card className="border-primary/20 shadow-2xl">
           <CardHeader>

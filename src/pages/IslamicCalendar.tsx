@@ -4,6 +4,7 @@ import { Calendar as CalendarIcon, Star } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import HomeButton from "@/components/HomeButton";
 
 interface HijriDate {
   day: number;
@@ -136,12 +137,10 @@ export default function IslamicCalendar() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <HomeButton />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">
-              ← Back to Home
-            </Link>
             <h1 className="text-4xl font-bold text-foreground mb-2">Islamic Calendar</h1>
             <p className="text-muted-foreground">Hijri dates and important Islamic events</p>
           </div>

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import HomeButton from "@/components/HomeButton";
 
 const FounderNote = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -45,11 +46,7 @@ const FounderNote = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/10 to-transparent animate-pulse" />
       </div>
 
-      <Link to="/" className="fixed top-6 left-6 z-50">
-        <Button variant="ghost" size="icon">
-          <Home className="h-5 w-5" />
-        </Button>
-      </Link>
+      <HomeButton />
 
       <div className="max-w-4xl w-full relative z-10">
         <div className="text-center mb-12 space-y-4">

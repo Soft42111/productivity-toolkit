@@ -5,6 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGr
 import { Button } from "@/components/ui/button";
 import { ArrowRightLeft, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import HomeButton from "@/components/HomeButton";
+import ThemeToggle from "@/components/ThemeToggle";
+import Footer from "@/components/Footer";
 
 const CurrencyConverter = () => {
   const [amount, setAmount] = useState("1");
@@ -215,6 +218,10 @@ const CurrencyConverter = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/10 p-6">
+      <HomeButton />
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       <div className="max-w-2xl mx-auto">
         <Card className="border-primary/20 shadow-2xl">
           <CardHeader>
