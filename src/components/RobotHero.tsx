@@ -27,16 +27,16 @@ const RobotHero = () => {
   }, []);
 
   return (
-    <div className="flex items-center justify-center mb-8">
+    <div className="flex items-center justify-center">
       {isProcessing ? (
-        <div className="w-32 h-32 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+        <div className="w-64 h-64 flex items-center justify-center">
+          <div className="w-12 h-12 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
         </div>
       ) : (
         <img
           src={processedImage || robotImage}
           alt="AI Robot"
-          className="w-32 h-32 object-contain"
+          className="w-64 h-64 object-contain drop-shadow-2xl"
         />
       )}
     </div>

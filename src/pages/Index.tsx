@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
-import Beams from "@/components/Beams";
 import InteractiveParticles from "@/components/InteractiveParticles";
 import CodeTabs from "@/components/CodeTabs";
 import RobotHero from "@/components/RobotHero";
@@ -167,7 +166,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative">
-      <Beams />
       <InteractiveParticles />
       <div className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full relative z-10">
         <div className="flex justify-between items-center mb-8">
@@ -190,9 +188,8 @@ const Index = () => {
           </div>
         </div>
 
-        <RobotHero />
-
-        <div className="mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 items-center">
+          <RobotHero />
           <CodeTabs />
         </div>
 

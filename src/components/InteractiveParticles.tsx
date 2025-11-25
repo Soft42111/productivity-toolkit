@@ -36,7 +36,7 @@ const InteractiveParticles = () => {
     if (!ctx) return;
 
     // Initialize particles
-    particlesRef.current = Array.from({ length: 80 }, () => ({
+    particlesRef.current = Array.from({ length: 150 }, () => ({
       x: Math.random() * dimensions.width,
       y: Math.random() * dimensions.height,
       vx: 0,
