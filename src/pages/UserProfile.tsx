@@ -21,65 +21,30 @@ const UserProfile = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/auth");
-      }
-    });
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/auth");
-      } else {
-        fetchProfile(session.user.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    // Temporarily disabled authentication
+    setLoading(false);
+  }, []);
 
   const fetchProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (!error && data) {
-      setUsername(data.username || "");
-    }
+    // Temporarily disabled
     setLoading(false);
   };
 
   const handleSaveProfile = async () => {
-    if (!user) return;
-    
+    // Temporarily disabled
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ username })
-      .eq("id", user.id);
-
-    if (error) {
-      toast({
-        title: "Error updating profile",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
+    setTimeout(() => {
       toast({
         title: "Profile updated",
-        description: "Your profile has been saved successfully.",
+        description: "Your profile has been saved locally.",
       });
-    }
-    setSaving(false);
+      setSaving(false);
+    }, 500);
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
+    // Temporarily disabled
+    navigate("/");
   };
 
   if (loading) {
@@ -120,7 +85,7 @@ const UserProfile = () => {
               <Input
                 id="email"
                 type="email"
-                value={user?.email || ""}
+                value="demo@example.com"
                 disabled
                 className="bg-muted"
               />
@@ -140,7 +105,7 @@ const UserProfile = () => {
             <div className="space-y-2">
               <Label>Member Since</Label>
               <Input
-                value={user?.created_at ? new Date(user.created_at).toLocaleDateString() : ""}
+                value={new Date().toLocaleDateString()}
                 disabled
                 className="bg-muted"
               />

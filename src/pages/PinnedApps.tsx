@@ -44,59 +44,25 @@ const PinnedApps = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-      else fetchPinnedApps();
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    // Temporarily disabled authentication
+    fetchPinnedApps();
+  }, []);
 
   const fetchPinnedApps = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("pinned_apps")
-      .select("app_path")
-      .eq("user_id", user.id);
-    
-    if (!error && data) {
-      setPinnedApps(data.map(p => p.app_path));
-    }
+    // Temporarily disabled - would fetch user pinned apps
+    setPinnedApps([]);
   };
 
   const togglePin = async (path: string) => {
-    if (!user) return;
-
+    // Temporarily disabled - toggle pin locally only
     const isPinned = pinnedApps.includes(path);
 
     if (isPinned) {
-      const { error } = await supabase
-        .from("pinned_apps")
-        .delete()
-        .eq("app_path", path)
-        .eq("user_id", user.id);
-
-      if (!error) {
-        setPinnedApps(pinnedApps.filter(p => p !== path));
-        toast({ title: "Unpinned" });
-      }
+      setPinnedApps(pinnedApps.filter(p => p !== path));
+      toast({ title: "Unpinned" });
     } else {
-      const { error } = await supabase
-        .from("pinned_apps")
-        .insert([{ app_path: path, user_id: user.id }]);
-
-      if (!error) {
-        setPinnedApps([...pinnedApps, path]);
-        toast({ title: "Pinned to favorites" });
-      }
+      setPinnedApps([...pinnedApps, path]);
+      toast({ title: "Pinned to favorites" });
     }
   };
 

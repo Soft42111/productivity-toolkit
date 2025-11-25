@@ -30,81 +30,48 @@ const NotesApp = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-      else fetchNotes();
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (!session) navigate("/auth");
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    // Temporarily disabled authentication
+    fetchNotes();
+  }, []);
 
   const fetchNotes = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("notes")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (!error && data) setNotes(data);
+    // Temporarily disabled - would fetch user notes
+    setNotes([]);
   };
 
   const createNote = async () => {
-    if (!user || !title.trim()) return;
+    if (!title.trim()) return;
 
-    const { data, error } = await supabase
-      .from("notes")
-      .insert([{ title, content, user_id: user.id }])
-      .select()
-      .single();
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setNotes([data, ...notes]);
-      setSelectedNote(data);
-      toast({ title: "Note created", description: "Your note has been saved." });
-    }
+    // Temporarily disabled - create note locally only
+    const newNote = {
+      id: Math.random().toString(),
+      title,
+      content,
+      created_at: new Date().toISOString(),
+      user_id: "temp"
+    };
+    setNotes([newNote, ...notes]);
+    setSelectedNote(newNote);
+    toast({ title: "Note created", description: "Your note has been saved locally." });
   };
 
   const updateNote = async () => {
-    if (!selectedNote || !user) return;
+    if (!selectedNote) return;
 
-    const { error } = await supabase
-      .from("notes")
-      .update({ title, content })
-      .eq("id", selectedNote.id);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, title, content } : n));
-      toast({ title: "Note updated", description: "Your changes have been saved." });
-    }
+    // Temporarily disabled - update note locally only
+    setNotes(notes.map(n => n.id === selectedNote.id ? { ...n, title, content } : n));
+    toast({ title: "Note updated", description: "Your changes have been saved locally." });
   };
 
   const deleteNote = async (id: string) => {
-    const { error } = await supabase.from("notes").delete().eq("id", id);
-
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
-    } else {
-      setNotes(notes.filter(n => n.id !== id));
-      if (selectedNote?.id === id) {
-        setSelectedNote(null);
-        setTitle("");
-        setContent("");
-      }
-      toast({ title: "Note deleted", description: "Your note has been removed." });
+    // Temporarily disabled - delete note locally only
+    setNotes(notes.filter(n => n.id !== id));
+    if (selectedNote?.id === id) {
+      setSelectedNote(null);
+      setTitle("");
+      setContent("");
     }
+    toast({ title: "Note deleted", description: "Your note has been removed locally." });
   };
 
   const selectNote = (note: Note) => {
