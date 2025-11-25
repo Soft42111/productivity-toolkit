@@ -57,67 +57,45 @@ const Index = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Load pinned apps from localStorage
+    const pinnedFromStorage = localStorage.getItem('pinnedApps');
+    if (pinnedFromStorage) {
+      setPinnedApps(JSON.parse(pinnedFromStorage));
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      if (newSession) {
-        fetchPinnedApps();
-      }
     });
 
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
-      if (currentSession) {
-        fetchPinnedApps();
-      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
   const fetchPinnedApps = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from("pinned_apps")
-      .select("app_path")
-      .eq("user_id", user.id);
-    
-    if (!error && data) {
-      setPinnedApps(data.map(p => p.app_path));
-    }
+    // No longer needed - using localStorage
   };
 
   const togglePin = async (path: string) => {
-    if (!user) {
-      toast({ title: "Sign in required", description: "Please sign in to pin apps", variant: "destructive" });
-      return;
-    }
-
-    const isPinned = pinnedApps.includes(path);
+    const pinnedFromStorage = localStorage.getItem('pinnedApps');
+    const currentPinned = pinnedFromStorage ? JSON.parse(pinnedFromStorage) : [];
+    
+    const isPinned = currentPinned.includes(path);
 
     if (isPinned) {
-      const { error } = await supabase
-        .from("pinned_apps")
-        .delete()
-        .eq("app_path", path)
-        .eq("user_id", user.id);
-
-      if (!error) {
-        setPinnedApps(pinnedApps.filter(p => p !== path));
-        toast({ title: "Unpinned" });
-      }
+      const newPinned = currentPinned.filter((p: string) => p !== path);
+      localStorage.setItem('pinnedApps', JSON.stringify(newPinned));
+      setPinnedApps(newPinned);
+      toast({ title: "Unpinned" });
     } else {
-      const { error } = await supabase
-        .from("pinned_apps")
-        .insert([{ app_path: path, user_id: user.id }]);
-
-      if (!error) {
-        setPinnedApps([...pinnedApps, path]);
-        toast({ title: "Pinned to favorites" });
-      }
+      const newPinned = [...currentPinned, path];
+      localStorage.setItem('pinnedApps', JSON.stringify(newPinned));
+      setPinnedApps(newPinned);
+      toast({ title: "Pinned to favorites" });
     }
   };
 
