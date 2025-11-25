@@ -61,8 +61,8 @@ const InteractiveDots = () => {
     const animate = () => {
       timeRef.current += 0.005;
       
-      // Very subtle trail effect
-      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      // More visible trail effect
+      ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       const mouse = mouseRef.current;
@@ -73,7 +73,7 @@ const InteractiveDots = () => {
       );
       const velocityDamping = Math.min(1, 5 / Math.max(cursorVelocity, 5));
       
-      const interactionRadius = window.innerWidth < 768 ? 120 : 150;
+      const interactionRadius = window.innerWidth < 768 ? 160 : 200;
       const repelForce = 1.2 * velocityDamping;
       const springForce = 0.08;
       const damping = 0.90;
@@ -148,16 +148,16 @@ const InteractiveDots = () => {
         const saturation = 15;
         const lightness = 70;
         
-        // Draw dot with low opacity and minimal glow
+        // Draw dot with more visible trails
         ctx.fillStyle = `hsl(${dot.hue}, ${saturation}%, ${lightness}%)`;
-        ctx.globalAlpha = 0.25 * pulse;
+        ctx.globalAlpha = 0.35 * pulse;
         
-        // Minimal glow
+        // Enhanced glow for trail visibility
         ctx.shadowColor = `hsl(${dot.hue}, ${saturation}%, ${lightness}%)`;
-        ctx.shadowBlur = 1;
+        ctx.shadowBlur = 3;
         
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 1.8, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.shadowBlur = 0;
