@@ -200,7 +200,7 @@ const CodeTabs = () => {
   }, []);
 
   return (
-    <Card className="w-full max-w-2xl mx-auto border-t-0 border border-border bg-card/95 backdrop-blur-sm overflow-hidden">
+    <Card className="w-full border-t-0 border border-border bg-card/95 backdrop-blur-sm overflow-hidden">
       <div className="flex bg-muted/30 text-[10px] border-b border-border">
         {tabs.map((tab, index) => (
           <div
