@@ -5,17 +5,17 @@ const Beams = () => {
 
   useEffect(() => {
     const generateBeams = () => {
-      const newBeams = Array.from({ length: 8 }, (_, i) => ({
+      const newBeams = Array.from({ length: 20 }, (_, i) => ({
         id: i,
-        delay: Math.random() * 5,
-        duration: 2 + Math.random() * 3,
+        delay: Math.random() * 3,
+        duration: 1.5 + Math.random() * 2,
         left: `${Math.random() * 100}%`,
       }));
       setBeams(newBeams);
     };
 
     generateBeams();
-    const interval = setInterval(generateBeams, 8000);
+    const interval = setInterval(generateBeams, 6000);
     return () => clearInterval(interval);
   }, []);
 
@@ -24,12 +24,13 @@ const Beams = () => {
       {beams.map((beam) => (
         <div
           key={beam.id}
-          className="absolute top-0 w-px bg-gradient-to-b from-transparent via-foreground/20 to-transparent"
+          className="absolute top-0 w-[2px] bg-gradient-to-b from-transparent via-white/60 to-transparent"
           style={{
             left: beam.left,
             height: "100%",
             animation: `beam-flash ${beam.duration}s linear ${beam.delay}s infinite`,
             opacity: 0,
+            filter: "blur(1px)",
           }}
         />
       ))}

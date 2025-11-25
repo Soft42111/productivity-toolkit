@@ -189,7 +189,7 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="mb-12">
+        <div className="mb-8">
           <CodeTabs />
         </div>
 
