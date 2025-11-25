@@ -29,72 +29,110 @@ const TodoList = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Auth listener
+  const STORAGE_KEY = "todos_local";
+
+  // Load todos from localStorage
+  const loadLocalTodos = () => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  // Save todos to localStorage
+  const saveLocalTodos = (todosToSave: Todo[]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(todosToSave));
+    } catch (error) {
+      console.error("Failed to save todos to localStorage:", error);
+    }
+  };
+
+  // Auth listener - no redirect
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (!session) {
-        navigate("/auth");
-      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
-      
-      if (!session) {
-        navigate("/auth");
-      }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
-  // Fetch todos from Supabase
+  // Load todos on mount and when user changes
   useEffect(() => {
-    if (!user) return;
+    if (loading) return;
 
-    const fetchTodos = async () => {
+    if (user) {
+      // Fetch from Supabase if authenticated
+      const fetchTodos = async () => {
+        const { data, error } = await supabase
+          .from("todos")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          toast({
+            title: "Error fetching todos",
+            description: error.message,
+            variant: "destructive",
+          });
+        } else {
+          setTodos(data || []);
+        }
+      };
+
+      fetchTodos();
+    } else {
+      // Load from localStorage if not authenticated
+      setTodos(loadLocalTodos());
+    }
+  }, [user, loading, toast]);
+
+  const addTodo = async () => {
+    if (!inputValue.trim()) return;
+
+    if (user) {
+      // Supabase flow
       const { data, error } = await supabase
         .from("todos")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .insert([{ text: inputValue, user_id: user.id, completed: false }])
+        .select()
+        .single();
 
       if (error) {
         toast({
-          title: "Error fetching todos",
+          title: "Error adding todo",
           description: error.message,
           variant: "destructive",
         });
       } else {
-        setTodos(data || []);
+        setTodos([data, ...todos]);
+        setInputValue("");
+        toast({
+          title: "Todo added",
+          description: "Your task has been added successfully.",
+        });
       }
-    };
-
-    fetchTodos();
-  }, [user, toast]);
-
-  const addTodo = async () => {
-    if (!inputValue.trim() || !user) return;
-
-    const { data, error } = await supabase
-      .from("todos")
-      .insert([{ text: inputValue, user_id: user.id, completed: false }])
-      .select()
-      .single();
-
-    if (error) {
-      toast({
-        title: "Error adding todo",
-        description: error.message,
-        variant: "destructive",
-      });
     } else {
-      setTodos([data, ...todos]);
+      // localStorage flow
+      const newTodo: Todo = {
+        id: crypto.randomUUID(),
+        text: inputValue,
+        completed: false,
+        user_id: "local",
+      };
+      const updatedTodos = [newTodo, ...todos];
+      setTodos(updatedTodos);
+      saveLocalTodos(updatedTodos);
       setInputValue("");
       toast({
         title: "Todo added",
@@ -107,42 +145,58 @@ const TodoList = () => {
     const todo = todos.find((t) => t.id === id);
     if (!todo) return;
 
-    const { error } = await supabase
-      .from("todos")
-      .update({ completed: !todo.completed })
-      .eq("id", id);
+    const updatedTodos = todos.map((t) =>
+      t.id === id ? { ...t, completed: !t.completed } : t
+    );
 
-    if (error) {
-      toast({
-        title: "Error updating todo",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (user) {
+      // Supabase flow
+      const { error } = await supabase
+        .from("todos")
+        .update({ completed: !todo.completed })
+        .eq("id", id);
+
+      if (error) {
+        toast({
+          title: "Error updating todo",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
-      setTodos(
-        todos.map((t) =>
-          t.id === id ? { ...t, completed: !t.completed } : t
-        )
-      );
+      // localStorage flow
+      saveLocalTodos(updatedTodos);
     }
+
+    setTodos(updatedTodos);
   };
 
   const deleteTodo = async (id: string) => {
-    const { error } = await supabase.from("todos").delete().eq("id", id);
+    const updatedTodos = todos.filter((todo) => todo.id !== id);
 
-    if (error) {
-      toast({
-        title: "Error deleting todo",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (user) {
+      // Supabase flow
+      const { error } = await supabase.from("todos").delete().eq("id", id);
+
+      if (error) {
+        toast({
+          title: "Error deleting todo",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
-      setTodos(todos.filter((todo) => todo.id !== id));
-      toast({
-        title: "Todo deleted",
-        description: "Your task has been removed.",
-      });
+      // localStorage flow
+      saveLocalTodos(updatedTodos);
     }
+
+    setTodos(updatedTodos);
+    toast({
+      title: "Todo deleted",
+      description: "Your task has been removed.",
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -158,24 +212,33 @@ const TodoList = () => {
 
     if (completedIds.length === 0) return;
 
-    const { error } = await supabase
-      .from("todos")
-      .delete()
-      .in("id", completedIds);
+    const updatedTodos = todos.filter((todo) => !todo.completed);
 
-    if (error) {
-      toast({
-        title: "Error clearing completed todos",
-        description: error.message,
-        variant: "destructive",
-      });
+    if (user) {
+      // Supabase flow
+      const { error } = await supabase
+        .from("todos")
+        .delete()
+        .in("id", completedIds);
+
+      if (error) {
+        toast({
+          title: "Error clearing completed todos",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
     } else {
-      setTodos(todos.filter((todo) => !todo.completed));
-      toast({
-        title: "Completed todos cleared",
-        description: "All completed tasks have been removed.",
-      });
+      // localStorage flow
+      saveLocalTodos(updatedTodos);
     }
+
+    setTodos(updatedTodos);
+    toast({
+      title: "Completed todos cleared",
+      description: "All completed tasks have been removed.",
+    });
   };
 
   const handleSignOut = async () => {
@@ -202,10 +265,16 @@ const TodoList = () => {
           <NavLink to="/" />
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <Button variant="outline" onClick={handleSignOut} size="sm">
-              <LogOut className="h-4 w-4 mr-2" />
-              Sign Out
-            </Button>
+            {user ? (
+              <Button variant="outline" onClick={handleSignOut} size="sm">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => navigate("/auth")} size="sm">
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
         
