@@ -8,15 +8,28 @@ interface Dot {
   originalY: number;
   vx: number;
   vy: number;
+  hue: number;
+}
+
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  hue: number;
 }
 
 const InteractiveDots = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dotsRef = useRef<Dot[]>([]);
+  const particlesRef = useRef<Particle[]>([]);
   const mouseRef = useRef({ x: 0, y: 0, isActive: false });
   const animationFrameRef = useRef<number>();
   const { theme, systemTheme } = useTheme();
   const [dotColor, setDotColor] = useState("#64748b");
+  const timeRef = useRef(0);
 
   useEffect(() => {
     // Update dot color based on theme
@@ -47,7 +60,7 @@ const InteractiveDots = () => {
 
     const initDots = () => {
       const isMobile = window.innerWidth < 768;
-      const spacing = isMobile ? 35 : 20; // Tighter spacing for more dots
+      const spacing = isMobile ? 35 : 20;
       const cols = Math.ceil(window.innerWidth / spacing);
       const rows = Math.ceil(window.innerHeight / spacing);
 
@@ -63,12 +76,15 @@ const InteractiveDots = () => {
             originalY: y,
             vx: 0,
             vy: 0,
+            hue: Math.random() * 360,
           });
         }
       }
     };
 
     const animate = () => {
+      timeRef.current += 0.01;
+      
       // Create trailing effect with semi-transparent clear
       ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
       ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
@@ -110,10 +126,14 @@ const InteractiveDots = () => {
         const maxVelocity = 10;
         const velocityRatio = Math.min(velocity / maxVelocity, 1);
         
-        // Map velocity to hue (0-360 degrees for rainbow effect)
-        const hue = velocityRatio * 280; // 0 = red/white, 280 = blue/purple
-        const saturation = velocityRatio * 70; // More saturated when moving faster
-        const lightness = 90 - velocityRatio * 20; // Slightly darker when moving
+        // Idle pulse animation
+        const pulse = Math.sin(timeRef.current + dot.originalX * 0.01 + dot.originalY * 0.01) * 0.5 + 0.5;
+        dot.hue = (dot.hue + 0.2) % 360;
+        
+        // Map velocity to hue with idle animation
+        const baseHue = velocityRatio > 0.1 ? velocityRatio * 280 : dot.hue;
+        const saturation = velocityRatio > 0.1 ? velocityRatio * 70 : 20 + pulse * 30;
+        const lightness = velocityRatio > 0.1 ? 90 - velocityRatio * 20 : 85 + pulse * 10;
         
         // Calculate distance from original position for glow effect
         const distFromOrigin = Math.sqrt(
@@ -123,19 +143,42 @@ const InteractiveDots = () => {
         const glowAmount = Math.min(distFromOrigin / maxDist, 1);
 
         // Draw dot with velocity-based color and subtle glow
-        ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-        ctx.globalAlpha = 0.5 + glowAmount * 0.2;
+        ctx.fillStyle = `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
+        ctx.globalAlpha = 0.4 + pulse * 0.1 + glowAmount * 0.2;
         
         // Add subtle glow
-        ctx.shadowColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-        ctx.shadowBlur = 3 + glowAmount * 4;
+        ctx.shadowColor = `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
+        ctx.shadowBlur = 2 + pulse * 1 + glowAmount * 4;
         
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 2, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, 1.5 + pulse * 0.3, 0, Math.PI * 2);
         ctx.fill();
         
-        // Reset shadow for next dot
+        // Reset shadow
         ctx.shadowBlur = 0;
+      });
+
+      // Animate particles
+      particlesRef.current = particlesRef.current.filter((particle) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.1; // Gravity
+        particle.vx *= 0.98; // Air resistance
+        particle.life--;
+
+        const lifeRatio = particle.life / particle.maxLife;
+        ctx.fillStyle = `hsl(${particle.hue}, 80%, 70%)`;
+        ctx.globalAlpha = lifeRatio * 0.8;
+        ctx.shadowColor = `hsl(${particle.hue}, 80%, 70%)`;
+        ctx.shadowBlur = 8;
+        
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, 2 * lifeRatio, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.shadowBlur = 0;
+
+        return particle.life > 0;
       });
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -160,7 +203,23 @@ const InteractiveDots = () => {
         isActive: true,
       };
       
-      // Create a stronger pulse effect on click
+      // Create explosion particles
+      const particleCount = 20;
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (Math.PI * 2 * i) / particleCount;
+        const speed = 3 + Math.random() * 4;
+        particlesRef.current.push({
+          x: e.clientX,
+          y: e.clientY,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 60,
+          maxLife: 60,
+          hue: Math.random() * 360,
+        });
+      }
+      
+      // Create stronger pulse effect on dots
       dotsRef.current.forEach((dot) => {
         const dx = dot.x - e.clientX;
         const dy = dot.y - e.clientY;
