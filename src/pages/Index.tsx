@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
-import InteractiveParticles from "@/components/InteractiveParticles";
+import InteractiveDots from "@/components/InteractiveDots";
 import CodeTabs from "@/components/CodeTabs";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
@@ -54,6 +54,7 @@ const Index = () => {
   const [pinnedApps, setPinnedApps] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [scrollY, setScrollY] = useState(0);
+  const [gradientOffset, setGradientOffset] = useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -80,10 +81,21 @@ const Index = () => {
   useEffect(() => {
     const handleScroll = () => {
       setScrollY(window.scrollY);
+      // Animate gradient based on scroll position
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollProgress = window.scrollY / maxScroll;
+      setGradientOffset(scrollProgress * 100);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const fetchPinnedApps = async () => {
     // No longer needed - using localStorage
@@ -166,7 +178,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
-      <InteractiveParticles />
+      <InteractiveDots />
+      
+      {/* Animated gradient background */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 opacity-40"
+        style={{
+          background: `radial-gradient(circle at ${50 + gradientOffset * 0.3}% ${30 + gradientOffset * 0.5}%, hsl(var(--primary) / 0.15), transparent 50%), 
+                       radial-gradient(circle at ${20 - gradientOffset * 0.2}% ${70 + gradientOffset * 0.3}%, hsl(var(--accent) / 0.1), transparent 50%)`,
+          transition: "background 0.3s ease-out",
+        }}
+      />
       
       {/* Hero Section - What is this? */}
       <div className="relative z-10 border-b border-border/50">
@@ -176,6 +198,14 @@ const Index = () => {
               <h1 className="text-2xl font-semibold text-foreground">
                 Power Tools
               </h1>
+              <nav className="hidden md:flex items-center gap-6">
+                <button onClick={() => scrollToSection("featured")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Featured
+                </button>
+                <button onClick={() => scrollToSection("all-tools")} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  All Tools
+                </button>
+              </nav>
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
@@ -249,15 +279,15 @@ const Index = () => {
         </div>
 
         {/* Code Preview */}
-        <div className="mb-24">
-          <div className="max-w-4xl mx-auto">
+        <div className="mb-24" id="preview">
+          <div className="max-w-3xl mx-auto">
             <CodeTabs />
           </div>
         </div>
 
         {/* Pinned Apps - Quick Access */}
         {filteredPinnedApps.length > 0 && (
-          <div className="mb-20">
+          <div className="mb-20" id="pinned">
             <div className="mb-8">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
                 Quick Access
@@ -299,7 +329,7 @@ const Index = () => {
         )}
 
         {/* Featured Apps - Best Tools */}
-        <div className="mb-20">
+        <div className="mb-20" id="featured">
           <div className="mb-8">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
               Featured Tools
@@ -342,7 +372,7 @@ const Index = () => {
         </div>
 
         {/* All Apps - Complete Collection */}
-        <div>
+        <div id="all-tools">
           <div className="mb-8">
             <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
               All Tools
