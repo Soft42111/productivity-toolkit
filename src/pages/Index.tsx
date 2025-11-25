@@ -40,7 +40,8 @@ import {
   Cloud,
   TrendingUp,
   Mic,
-  Link2
+  Link2,
+  Book
 } from "lucide-react";
 
 const Index = () => {
@@ -120,6 +121,7 @@ const Index = () => {
   };
 
   const allApps = [
+    { title: "Islamic Studies", description: "Sunnah, Hadith & Quran with references", icon: Book, path: "/islamic-studies", gradient: "from-emerald-500 to-teal-500", isBest: true },
     { title: "Chat with Gemini", description: "AI-powered conversational assistant", icon: Bot, path: "/chat-gemini", gradient: "from-purple-500 to-pink-500", isBest: true },
     { title: "Weather Dashboard", description: "Real-time weather data", icon: Cloud, path: "/weather", gradient: "from-blue-500 to-cyan-500", isBest: true },
     { title: "Currency Converter", description: "Live exchange rates", icon: TrendingUp, path: "/currency", gradient: "from-green-500 to-emerald-500", isBest: true },
