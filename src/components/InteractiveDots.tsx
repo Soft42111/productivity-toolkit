@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
 
 interface Dot {
   x: number;
@@ -14,6 +15,18 @@ const InteractiveDots = () => {
   const dotsRef = useRef<Dot[]>([]);
   const mouseRef = useRef({ x: 0, y: 0, isActive: false });
   const animationFrameRef = useRef<number>();
+  const { theme, systemTheme } = useTheme();
+  const [dotColor, setDotColor] = useState("#64748b");
+
+  useEffect(() => {
+    // Update dot color based on theme
+    const currentTheme = theme === "system" ? systemTheme : theme;
+    if (currentTheme === "dark") {
+      setDotColor("#94a3b8"); // Lighter for dark mode
+    } else {
+      setDotColor("#64748b"); // Darker for light mode
+    }
+  }, [theme, systemTheme]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,10 +72,10 @@ const InteractiveDots = () => {
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
       const mouse = mouseRef.current;
-      const interactionRadius = window.innerWidth < 768 ? 100 : 150;
-      const repelForce = 0.6;
-      const springForce = 0.12;
-      const damping = 0.88;
+      const interactionRadius = window.innerWidth < 768 ? 120 : 180;
+      const repelForce = 1.2;
+      const springForce = 0.15;
+      const damping = 0.85;
 
       dotsRef.current.forEach((dot) => {
         if (mouse.isActive) {
@@ -70,10 +83,11 @@ const InteractiveDots = () => {
           const dy = dot.y - mouse.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < interactionRadius) {
-            const force = ((interactionRadius - distance) / interactionRadius) * repelForce;
-            dot.vx += (dx / distance) * force;
-            dot.vy += (dy / distance) * force;
+          if (distance < interactionRadius && distance > 0) {
+            const force = Math.pow((interactionRadius - distance) / interactionRadius, 2) * repelForce;
+            const angle = Math.atan2(dy, dx);
+            dot.vx += Math.cos(angle) * force;
+            dot.vy += Math.sin(angle) * force;
           }
         }
 
@@ -93,14 +107,14 @@ const InteractiveDots = () => {
         const distFromOrigin = Math.sqrt(
           Math.pow(dot.x - dot.originalX, 2) + Math.pow(dot.y - dot.originalY, 2)
         );
-        const maxDist = 50;
+        const maxDist = 60;
         const fadeAmount = Math.min(distFromOrigin / maxDist, 1);
 
-        // Draw dot with dynamic size and opacity
-        ctx.fillStyle = "#64748b"; // Slate color for visibility
-        ctx.globalAlpha = 0.25 + fadeAmount * 0.15;
+        // Draw dot with dynamic size and opacity - theme aware
+        ctx.fillStyle = dotColor;
+        ctx.globalAlpha = 0.3 + fadeAmount * 0.2;
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 2 + fadeAmount * 0.5, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, 4 + fadeAmount * 1, 0, Math.PI * 2);
         ctx.fill();
       });
 
@@ -131,12 +145,13 @@ const InteractiveDots = () => {
         const dx = dot.x - e.clientX;
         const dy = dot.y - e.clientY;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        const clickRadius = 150;
+        const clickRadius = 200;
 
-        if (distance < clickRadius) {
-          const force = ((clickRadius - distance) / clickRadius) * 1.2;
-          dot.vx += (dx / distance) * force;
-          dot.vy += (dy / distance) * force;
+        if (distance < clickRadius && distance > 0) {
+          const force = Math.pow((clickRadius - distance) / clickRadius, 2) * 2.5;
+          const angle = Math.atan2(dy, dx);
+          dot.vx += Math.cos(angle) * force;
+          dot.vy += Math.sin(angle) * force;
         }
       });
     };
