@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
+import HomeButton from "@/components/HomeButton";
 
 export default function QiblaCompass() {
   const [location, setLocation] = useState({ lat: 0, lng: 0, city: "Loading..." });
@@ -139,12 +140,10 @@ export default function QiblaCompass() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <HomeButton />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">
-              ← Back to Home
-            </Link>
             <h1 className="text-4xl font-bold text-foreground mb-2">Qibla Compass</h1>
             <p className="text-muted-foreground">Find the direction to Kaaba for prayer</p>
           </div>

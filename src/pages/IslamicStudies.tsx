@@ -8,6 +8,7 @@ import { Loader2, Book, BookOpen, FileText, Shuffle } from "lucide-react";
 import { toast } from "sonner";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import HomeButton from "@/components/HomeButton";
 
 interface Message {
   role: "user" | "assistant";
@@ -149,12 +150,10 @@ export default function IslamicStudies() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <HomeButton />
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <Link to="/" className="text-sm text-muted-foreground hover:text-foreground mb-2 inline-block">
-              ← Back to Home
-            </Link>
             <h1 className="text-4xl font-bold text-foreground mb-2">Islamic Studies</h1>
             <p className="text-muted-foreground">Discover random Sunnah, Hadith, and Quran verses with references</p>
           </div>

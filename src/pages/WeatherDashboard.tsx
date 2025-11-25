@@ -4,6 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Cloud, Search, Wind, Droplets, Eye, Gauge, Sunrise, Sunset } from "lucide-react";
+import HomeButton from "@/components/HomeButton";
+import ThemeToggle from "@/components/ThemeToggle";
+import Footer from "@/components/Footer";
 
 const WeatherDashboard = () => {
   const [city, setCity] = useState("");
@@ -34,6 +37,10 @@ const WeatherDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/10 p-6">
+      <HomeButton />
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
       <div className="max-w-4xl mx-auto">
         <Card className="mb-6 border-primary/20 shadow-lg">
           <CardHeader>

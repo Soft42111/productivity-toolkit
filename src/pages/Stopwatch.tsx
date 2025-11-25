@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Play, Pause, RotateCcw, Flag } from "lucide-react";
+import { Play, Pause, RotateCcw, Flag } from "lucide-react";
 import { Link } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import HomeButton from "@/components/HomeButton";
 
 const Stopwatch = () => {
   const [time, setTime] = useState(0);
@@ -54,14 +55,9 @@ const Stopwatch = () => {
 
   return (
     <div className="min-h-screen bg-background p-6 animate-fade-in flex flex-col">
+      <HomeButton />
       <div className="max-w-2xl mx-auto flex-1">
-        <div className="flex justify-between items-center mb-6">
-          <Link to="/">
-            <Button variant="ghost">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Home
-            </Button>
-          </Link>
+        <div className="flex justify-end items-center mb-6">
           <ThemeToggle />
         </div>
 
