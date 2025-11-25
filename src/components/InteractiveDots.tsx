@@ -103,19 +103,27 @@ const InteractiveDots = () => {
         dot.x += dot.vx;
         dot.y += dot.vy;
 
-        // Calculate distance from original position for fade effect
+        // Calculate distance from original position for glow effect
         const distFromOrigin = Math.sqrt(
           Math.pow(dot.x - dot.originalX, 2) + Math.pow(dot.y - dot.originalY, 2)
         );
         const maxDist = 60;
-        const fadeAmount = Math.min(distFromOrigin / maxDist, 1);
+        const glowAmount = Math.min(distFromOrigin / maxDist, 1);
 
-        // Draw dot with dynamic size and opacity - theme aware
-        ctx.fillStyle = dotColor;
-        ctx.globalAlpha = 0.3 + fadeAmount * 0.2;
+        // Draw dot with glow effect
+        ctx.fillStyle = "#ffffff";
+        ctx.globalAlpha = 0.4 + glowAmount * 0.3;
+        
+        // Add glow
+        ctx.shadowColor = "#ffffff";
+        ctx.shadowBlur = 8 + glowAmount * 12;
+        
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 1.5, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, 2, 0, Math.PI * 2);
         ctx.fill();
+        
+        // Reset shadow for next dot
+        ctx.shadowBlur = 0;
       });
 
       animationFrameRef.current = requestAnimationFrame(animate);
