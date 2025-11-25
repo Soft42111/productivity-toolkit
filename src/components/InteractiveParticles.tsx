@@ -86,7 +86,7 @@ const InteractiveParticles = () => {
         }
 
         // Draw particle
-        ctx.fillStyle = "hsl(var(--foreground) / 0.3)";
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         ctx.fill();

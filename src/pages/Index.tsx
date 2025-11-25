@@ -195,25 +195,28 @@ const Index = () => {
 
         {pinnedAppsList.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
               Pinned
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {pinnedAppsList.map((app, index) => {
                 const Icon = app.icon;
                 const isPinned = pinnedApps.includes(app.path);
                 return (
                   <Link key={index} to={app.path} className="group">
-                    <Card className="h-32 border border-border bg-card hover:bg-muted/50 transition-colors relative overflow-hidden">
-                      <div className="p-4 h-full flex flex-col justify-between">
-                        <div className="flex justify-between items-start">
-                          <Icon className="w-6 h-6 text-foreground" />
-                          <Button size="icon" variant="ghost" onClick={(e) => { e.preventDefault(); togglePin(app.path); }} className="h-6 w-6 -mt-1 -mr-1">
-                            <Pin className="h-3 w-3 text-foreground" />
-                          </Button>
-                        </div>
-                        <h3 className="text-sm font-medium text-foreground leading-tight">{app.title}</h3>
+                    <Card className="aspect-square border border-border bg-card hover:bg-muted/50 transition-all hover:scale-[1.02] relative overflow-hidden">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                        <Icon className="w-12 h-12 text-foreground mb-2" />
+                        <h3 className="text-xs font-medium text-foreground text-center leading-tight">{app.title}</h3>
                       </div>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
+                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Pin className="h-3 w-3 text-foreground" />
+                      </Button>
                     </Card>
                   </Link>
                 );
@@ -223,33 +226,34 @@ const Index = () => {
         )}
 
         <div className="mb-8">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
             Featured
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2 auto-rows-fr">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 auto-rows-fr">
             {bestApps.map((app, index) => {
               const Icon = app.icon;
               const isPinned = pinnedApps.includes(app.path);
-              const isLarge = index === 0 || index === 5 || index === 10;
+              const isLarge = index === 0 || index === 5;
               return (
                 <Link 
                   key={index} 
                   to={app.path} 
                   className={`group ${isLarge ? 'md:col-span-2 md:row-span-2' : ''}`}
                 >
-                  <Card className={`${isLarge ? 'h-64' : 'h-32'} border border-border bg-card hover:bg-muted/50 transition-colors relative overflow-hidden`}>
-                    <div className={`${isLarge ? 'p-6' : 'p-4'} h-full flex flex-col justify-between`}>
-                      <div className="flex justify-between items-start">
-                        <Icon className={`${isLarge ? 'w-8 h-8' : 'w-6 h-6'} text-foreground`} />
-                        <Button size="icon" variant="ghost" onClick={(e) => { e.preventDefault(); togglePin(app.path); }} className="h-6 w-6 -mt-1 -mr-1">
-                          {isPinned ? <Pin className="h-3 w-3 text-foreground" /> : <PinOff className="h-3 w-3 text-muted-foreground" />}
-                        </Button>
-                      </div>
-                      <div>
-                        <h3 className={`${isLarge ? 'text-base' : 'text-sm'} font-medium text-foreground leading-tight mb-1`}>{app.title}</h3>
-                        {isLarge && <p className="text-xs text-muted-foreground">{app.description}</p>}
-                      </div>
+                  <Card className={`${isLarge ? 'aspect-[2/1] md:aspect-square' : 'aspect-square'} border border-border bg-card hover:bg-muted/50 transition-all hover:scale-[1.02] relative overflow-hidden`}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                      <Icon className={`${isLarge ? 'w-16 h-16' : 'w-12 h-12'} text-foreground mb-2`} />
+                      <h3 className={`${isLarge ? 'text-sm' : 'text-xs'} font-medium text-foreground text-center leading-tight`}>{app.title}</h3>
+                      {isLarge && <p className="text-[10px] text-muted-foreground text-center mt-1">{app.description}</p>}
                     </div>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
+                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      {isPinned ? <Pin className="h-3 w-3 text-foreground" /> : <PinOff className="h-3 w-3 text-muted-foreground" />}
+                    </Button>
                   </Card>
                 </Link>
               );
@@ -258,25 +262,28 @@ const Index = () => {
         </div>
 
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
             All Tools
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {otherApps.map((app, index) => {
               const Icon = app.icon;
               const isPinned = pinnedApps.includes(app.path);
               return (
                 <Link key={index} to={app.path} className="group">
-                  <Card className="h-32 border border-border bg-card hover:bg-muted/50 transition-colors relative overflow-hidden">
-                    <div className="p-4 h-full flex flex-col justify-between">
-                      <div className="flex justify-between items-start">
-                        <Icon className="w-6 h-6 text-foreground" />
-                        <Button size="icon" variant="ghost" onClick={(e) => { e.preventDefault(); togglePin(app.path); }} className="h-6 w-6 -mt-1 -mr-1">
-                          {isPinned ? <Pin className="h-3 w-3 text-foreground" /> : <PinOff className="h-3 w-3 text-muted-foreground" />}
-                        </Button>
-                      </div>
-                      <h3 className="text-sm font-medium text-foreground leading-tight">{app.title}</h3>
+                  <Card className="aspect-square border border-border bg-card hover:bg-muted/50 transition-all hover:scale-[1.02] relative overflow-hidden">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                      <Icon className="w-12 h-12 text-foreground mb-2" />
+                      <h3 className="text-xs font-medium text-foreground text-center leading-tight">{app.title}</h3>
                     </div>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
+                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      {isPinned ? <Pin className="h-3 w-3 text-foreground" /> : <PinOff className="h-3 w-3 text-muted-foreground" />}
+                    </Button>
                   </Card>
                 </Link>
               );
