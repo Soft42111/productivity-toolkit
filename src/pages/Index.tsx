@@ -156,50 +156,61 @@ const Index = () => {
   const filteredOtherApps = filterApps(otherApps);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col relative">
+    <div className="min-h-screen bg-background flex flex-col relative overflow-hidden">
       <InteractiveParticles />
-      <div className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full relative z-10">
-        <div className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <h1 className="text-6xl font-extrabold text-foreground tracking-tight mb-2">
+      
+      {/* Hero Section - What is this? */}
+      <div className="relative z-10 border-b border-border/50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-8">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-8">
+              <h1 className="text-2xl font-semibold text-foreground">
                 Power Tools
               </h1>
-              <p className="text-lg text-muted-foreground">
-                Essential productivity tools for modern workflows
-              </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <ThemeToggle />
               {user ? (
-                <Button variant="ghost" onClick={handleSignOut} size="sm" className="h-8">
+                <Button variant="ghost" onClick={handleSignOut} size="sm">
                   <LogOut className="h-4 w-4 mr-2" />
                   Sign Out
                 </Button>
               ) : (
-                <Button variant="ghost" onClick={() => navigate("/auth")} size="sm" className="h-8">
+                <Button variant="outline" onClick={() => navigate("/auth")} size="sm">
                   <LogIn className="h-4 w-4 mr-2" />
                   Sign In
                 </Button>
               )}
             </div>
           </div>
-          
-          <div className="max-w-3xl mb-8">
-            <CodeTabs />
-          </div>
+        </div>
+      </div>
 
-          <div className="max-w-md">
-            <div className="relative">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-24 flex-1 w-full relative z-10">
+        {/* Introduction */}
+        <div className="mb-24 text-center max-w-3xl mx-auto space-y-8">
+          <h2 className="text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
+            Essential tools for
+            <span className="block text-gradient bg-gradient-to-r from-accent to-primary">modern workflows</span>
+          </h2>
+          <p className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
+            Streamline your daily tasks with a curated collection of productivity tools.
+            Fast, simple, and always accessible.
+          </p>
+          
+          {/* Search - How do I find what I need? */}
+          <div className="max-w-md mx-auto pt-4">
+            <div className="relative group">
               <input
                 type="text"
                 placeholder="Search tools..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-10 pr-4 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring transition-all"
+                className="w-full h-12 pl-12 pr-4 rounded-xl border border-border bg-background/60 backdrop-blur-sm text-sm shadow-sm transition-all duration-300 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:shadow-md"
               />
               <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors group-focus-within:text-accent"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -215,12 +226,25 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Code Preview */}
+        <div className="mb-24">
+          <div className="max-w-4xl mx-auto">
+            <CodeTabs />
+          </div>
+        </div>
+
+        {/* Pinned Apps - Quick Access */}
         {filteredPinnedApps.length > 0 && (
-          <div className="mb-8">
-            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
-              Pinned
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="mb-20">
+            <div className="mb-8">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                Quick Access
+              </h3>
+              <p className="text-base text-muted-foreground">
+                Your most-used tools, always at hand
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {filteredPinnedApps.map((app, index) => {
                 const Icon = app.icon;
                 const isPinned = pinnedApps.includes(app.path);
@@ -229,18 +253,18 @@ const Index = () => {
                     key={index} 
                     to={app.path} 
                     className="group"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    style={{ animationDelay: `${index * 40}ms` }}
                   >
-                    <Card className="aspect-square border border-border bg-card hover:bg-muted/50 transition-all hover:scale-[1.02] hover:shadow-lg relative overflow-hidden animate-fade-in">
-                      <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                        <Icon className="w-12 h-12 text-foreground mb-2 transition-transform group-hover:scale-110" />
-                        <h3 className="text-xs font-medium text-foreground text-center leading-tight">{app.title}</h3>
+                    <Card className="aspect-square border border-border/50 glass transition-all duration-300 hover:border-accent/50 hover:scale-[1.03] hover:shadow-xl relative overflow-hidden animate-fade-in">
+                      <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
+                        <Icon className="w-10 h-10 lg:w-12 lg:h-12 text-foreground mb-3 transition-all duration-300 group-hover:scale-110 group-hover:text-accent" />
+                        <h3 className="text-xs font-medium text-center leading-tight text-foreground group-hover:text-accent transition-colors">{app.title}</h3>
                       </div>
                       <Button 
                         size="icon" 
                         variant="ghost" 
                         onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
-                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Pin className="h-3 w-3 text-accent" />
                       </Button>
@@ -252,11 +276,17 @@ const Index = () => {
           </div>
         )}
 
-        <div className="mb-8">
-          <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
-            Featured
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 auto-rows-fr">
+        {/* Featured Apps - Best Tools */}
+        <div className="mb-20">
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+              Featured Tools
+            </h3>
+            <p className="text-base text-muted-foreground">
+              Our most popular and powerful utilities
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-fr">
             {filteredBestApps.map((app, index) => {
               const Icon = app.icon;
               const isPinned = pinnedApps.includes(app.path);
@@ -265,20 +295,20 @@ const Index = () => {
                 <Link 
                   key={index} 
                   to={app.path} 
-                  className={`group ${isLarge ? 'md:col-span-2 md:row-span-2' : ''}`}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  className={`group ${isLarge ? 'sm:col-span-2 sm:row-span-2' : ''}`}
+                  style={{ animationDelay: `${index * 40}ms` }}
                 >
-                  <Card className={`${isLarge ? 'aspect-[2/1] md:aspect-square' : 'aspect-square'} border border-border bg-card hover:bg-muted/50 transition-all hover:scale-[1.02] hover:shadow-lg relative overflow-hidden animate-fade-in`}>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                      <Icon className={`${isLarge ? 'w-16 h-16' : 'w-12 h-12'} text-foreground mb-2 transition-transform group-hover:scale-110`} />
-                      <h3 className={`${isLarge ? 'text-sm' : 'text-xs'} font-medium text-foreground text-center leading-tight`}>{app.title}</h3>
-                      {isLarge && <p className="text-[10px] text-muted-foreground text-center mt-1">{app.description}</p>}
+                  <Card className={`${isLarge ? 'aspect-square' : 'aspect-square'} border border-border/50 glass transition-all duration-300 hover:border-accent/50 hover:scale-[1.03] hover:shadow-xl relative overflow-hidden animate-fade-in`}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
+                      <Icon className={`${isLarge ? 'w-16 h-16 lg:w-20 lg:h-20' : 'w-10 h-10 lg:w-12 lg:h-12'} text-foreground mb-3 transition-all duration-300 group-hover:scale-110 group-hover:text-accent`} />
+                      <h3 className={`${isLarge ? 'text-sm lg:text-base' : 'text-xs'} font-medium text-center leading-tight text-foreground group-hover:text-accent transition-colors`}>{app.title}</h3>
+                      {isLarge && <p className="text-[10px] lg:text-xs text-muted-foreground text-center mt-2 px-2">{app.description}</p>}
                     </div>
                     <Button 
                       size="icon" 
                       variant="ghost" 
                       onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
-                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       {isPinned ? <Pin className="h-3 w-3 text-accent" /> : <PinOff className="h-3 w-3 text-muted-foreground" />}
                     </Button>
@@ -289,11 +319,17 @@ const Index = () => {
           </div>
         </div>
 
+        {/* All Apps - Complete Collection */}
         <div>
-          <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
-            All Tools
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="mb-8">
+            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
+              All Tools
+            </h3>
+            <p className="text-base text-muted-foreground">
+              The complete toolkit for every need
+            </p>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {filteredOtherApps.map((app, index) => {
               const Icon = app.icon;
               const isPinned = pinnedApps.includes(app.path);
@@ -302,18 +338,18 @@ const Index = () => {
                   key={index} 
                   to={app.path} 
                   className="group"
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  style={{ animationDelay: `${index * 40}ms` }}
                 >
-                  <Card className="aspect-square border border-border bg-card hover:bg-muted/50 transition-all hover:scale-[1.02] hover:shadow-lg relative overflow-hidden animate-fade-in">
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
-                      <Icon className="w-12 h-12 text-foreground mb-2 transition-transform group-hover:scale-110" />
-                      <h3 className="text-xs font-medium text-foreground text-center leading-tight">{app.title}</h3>
+                  <Card className="aspect-square border border-border/50 glass transition-all duration-300 hover:border-accent/50 hover:scale-[1.03] hover:shadow-xl relative overflow-hidden animate-fade-in">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
+                      <Icon className="w-10 h-10 lg:w-12 lg:h-12 text-foreground mb-3 transition-all duration-300 group-hover:scale-110 group-hover:text-accent" />
+                      <h3 className="text-xs font-medium text-center leading-tight text-foreground group-hover:text-accent transition-colors">{app.title}</h3>
                     </div>
                     <Button 
                       size="icon" 
                       variant="ghost" 
                       onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
-                      className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       {isPinned ? <Pin className="h-3 w-3 text-accent" /> : <PinOff className="h-3 w-3 text-muted-foreground" />}
                     </Button>

@@ -1,10 +1,15 @@
 const Footer = () => {
   return (
-    <footer className="mt-auto py-6 border-t border-border">
-      <div className="max-w-6xl mx-auto px-6 text-center">
-        <p className="text-sm text-muted-foreground">
-          © 2025 Productivity Toolkit. All rights reserved.
-        </p>
+    <footer className="mt-auto py-8 border-t border-border/50 backdrop-blur-sm">
+      <div className="max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Power Tools. Crafted for productivity.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Made with precision and care
+          </p>
+        </div>
       </div>
     </footer>
   );

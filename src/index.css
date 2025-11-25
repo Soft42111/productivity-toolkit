@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -9,97 +11,94 @@ All colors MUST be HSL.
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 220 15% 20%;
+    --foreground: 215 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 20%;
+    --card-foreground: 215 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 20%;
+    --popover-foreground: 215 20% 15%;
 
-    --primary: 220 15% 25%;
+    --primary: 215 25% 18%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 10% 96%;
-    --secondary-foreground: 220 15% 25%;
+    --secondary: 215 15% 96%;
+    --secondary-foreground: 215 25% 18%;
 
-    --muted: 220 10% 96%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 215 12% 95%;
+    --muted-foreground: 215 15% 45%;
 
-    --accent: 200 95% 45%;
+    --accent: 200 100% 42%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 85% 60%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 92%;
-    --input: 220 15% 95%;
-    --ring: 220 15% 25%;
+    --border: 215 15% 90%;
+    --input: 215 15% 92%;
+    --ring: 200 100% 42%;
 
-    --radius: 0.25rem;
-    --primary-rgb: 51, 60, 74;
+    --radius: 0.5rem;
+    --primary-rgb: 35, 46, 59;
     
-    --gradient-primary: linear-gradient(135deg, hsl(220 15% 25%), hsl(220 15% 35%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 10% 98%));
-    --gradient-accent: linear-gradient(90deg, hsl(200 95% 45%), hsl(210 95% 50%));
-    --shadow-neon: 0 0 20px hsl(200 95% 45% / 0.08);
-    --shadow-soft: 0 2px 8px -2px hsl(220 15% 20% / 0.08);
-    --shadow-hover: 0 4px 16px -4px hsl(220 15% 20% / 0.12);
-    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --gradient-primary: linear-gradient(135deg, hsl(215 25% 18%), hsl(215 25% 25%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(215 10% 98%));
+    --gradient-accent: linear-gradient(135deg, hsl(200 100% 42%), hsl(210 100% 48%));
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 220 20% 10%;
-    --foreground: 220 10% 95%;
+    --background: 215 25% 8%;
+    --foreground: 215 15% 92%;
 
-    --card: 220 20% 13%;
-    --card-foreground: 220 10% 95%;
+    --card: 215 25% 11%;
+    --card-foreground: 215 15% 92%;
 
-    --popover: 220 20% 13%;
-    --popover-foreground: 220 10% 95%;
+    --popover: 215 25% 11%;
+    --popover-foreground: 215 15% 92%;
 
-    --primary: 220 10% 90%;
-    --primary-foreground: 220 20% 10%;
+    --primary: 215 15% 88%;
+    --primary-foreground: 215 25% 8%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 220 10% 95%;
+    --secondary: 215 20% 15%;
+    --secondary-foreground: 215 15% 92%;
 
-    --muted: 220 15% 20%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 215 20% 18%;
+    --muted-foreground: 215 15% 58%;
 
-    --accent: 200 95% 50%;
-    --accent-foreground: 220 20% 10%;
+    --accent: 200 100% 48%;
+    --accent-foreground: 215 25% 8%;
 
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 220 10% 95%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 215 15% 92%;
 
-    --border: 220 15% 22%;
-    --input: 220 15% 20%;
-    --ring: 220 10% 90%;
+    --border: 215 20% 20%;
+    --input: 215 20% 18%;
+    --ring: 200 100% 48%;
     
-    --primary-rgb: 229, 232, 237;
-    --gradient-primary: linear-gradient(135deg, hsl(220 10% 90%), hsl(220 10% 80%));
-    --gradient-card: linear-gradient(145deg, hsl(220 20% 13%), hsl(220 20% 16%));
-    --gradient-accent: linear-gradient(90deg, hsl(200 95% 50%), hsl(210 95% 55%));
-    --shadow-neon: 0 0 20px hsl(200 95% 50% / 0.15);
-    --shadow-soft: 0 2px 8px -2px hsl(220 20% 0% / 0.4);
-    --shadow-hover: 0 4px 16px -4px hsl(220 20% 0% / 0.5);
+    --primary-rgb: 224, 228, 233;
+    --gradient-primary: linear-gradient(135deg, hsl(215 15% 88%), hsl(215 15% 78%));
+    --gradient-card: linear-gradient(145deg, hsl(215 25% 11%), hsl(215 25% 14%));
+    --gradient-accent: linear-gradient(135deg, hsl(200 100% 48%), hsl(210 100% 54%));
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.7), 0 8px 10px -6px rgb(0 0 0 / 0.7);
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -117,7 +116,17 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+    font-variation-settings: "opsz" auto;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 
   .scrollbar-hide {
@@ -163,5 +172,13 @@ All colors MUST be HSL.
       transform: translateX(300px) translateY(300px) rotate(-45deg);
       opacity: 0;
     }
+  }
+
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-foreground to-muted-foreground;
   }
 }
