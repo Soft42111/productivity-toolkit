@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import Beams from "@/components/Beams";
 import InteractiveParticles from "@/components/InteractiveParticles";
 import CodeTabs from "@/components/CodeTabs";
+import RobotHero from "@/components/RobotHero";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
 import { 
@@ -170,7 +171,7 @@ const Index = () => {
       <InteractiveParticles />
       <div className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full relative z-10">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground tracking-tight">
+          <h1 className="text-5xl font-extrabold text-foreground tracking-tight">
             Power Tools
           </h1>
           <div className="flex items-center gap-3">
@@ -189,13 +190,15 @@ const Index = () => {
           </div>
         </div>
 
+        <RobotHero />
+
         <div className="mb-8">
           <CodeTabs />
         </div>
 
         {pinnedAppsList.length > 0 && (
           <div className="mb-8">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+            <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
               Pinned
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -226,7 +229,7 @@ const Index = () => {
         )}
 
         <div className="mb-8">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+          <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
             Featured
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 auto-rows-fr">
@@ -262,7 +265,7 @@ const Index = () => {
         </div>
 
         <div>
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-4">
+          <h2 className="text-base font-bold text-foreground uppercase tracking-wider mb-4">
             All Tools
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
