@@ -69,7 +69,9 @@ const InteractiveDots = () => {
     };
 
     const animate = () => {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      // Create trailing effect with semi-transparent clear
+      ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+      ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
 
       const mouse = mouseRef.current;
       const interactionRadius = window.innerWidth < 768 ? 120 : 180;
