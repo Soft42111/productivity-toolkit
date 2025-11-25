@@ -73,8 +73,8 @@ const InteractiveDots = () => {
       );
       const velocityDamping = Math.min(1, 5 / Math.max(cursorVelocity, 5));
       
-      const interactionRadius = window.innerWidth < 768 ? 100 : 120;
-      const repelForce = 0.6 * velocityDamping;
+      const interactionRadius = window.innerWidth < 768 ? 120 : 150;
+      const repelForce = 1.2 * velocityDamping;
       const springForce = 0.08;
       const damping = 0.90;
 
@@ -124,7 +124,7 @@ const InteractiveDots = () => {
         ctx.shadowBlur = 1;
         
         ctx.beginPath();
-        ctx.arc(dot.x, dot.y, 1, 0, Math.PI * 2);
+        ctx.arc(dot.x, dot.y, 1.8, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.shadowBlur = 0;
