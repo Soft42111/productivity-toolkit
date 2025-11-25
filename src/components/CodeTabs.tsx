@@ -200,34 +200,35 @@ const CodeTabs = () => {
   }, []);
 
   return (
-    <Card className="w-full border-t-0 border border-border bg-card/95 backdrop-blur-sm overflow-hidden">
-      <div className="flex bg-muted/30 text-[10px] border-b border-border">
+    <Card className="w-full border border-border bg-card/95 backdrop-blur-sm overflow-hidden shadow-lg">
+      <div className="flex bg-muted/20 text-[10px] border-b border-border">
         {tabs.map((tab, index) => (
           <div
             key={tab.name}
             onClick={() => setActiveTab(index)}
-            className={`group relative flex items-center gap-1.5 px-3 py-1.5 font-mono cursor-pointer border-r border-border transition-colors ${
+            className={`group relative flex items-center gap-1.5 px-4 py-2 font-mono cursor-pointer border-r border-border transition-all ${
               activeTab === index
-                ? "bg-card text-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                ? "bg-card text-foreground border-b-2 border-b-accent"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
             }`}
           >
-            <span className="text-yellow-500">●</span>
-            <span>{tab.name}</span>
-            <button className="opacity-0 group-hover:opacity-100 ml-1 hover:bg-muted rounded-sm p-0.5">
+            <span className={activeTab === index ? "text-accent" : "text-yellow-500"}>●</span>
+            <span className="font-medium">{tab.name}</span>
+            <button className="opacity-0 group-hover:opacity-100 ml-2 hover:bg-muted/60 rounded-sm p-0.5 transition-opacity">
               ×
             </button>
           </div>
         ))}
         <div className="flex-1 bg-muted/10" />
       </div>
-      <div className="p-4 bg-card">
-        <div className="flex items-center gap-1.5 mb-3 pb-2 border-b border-border/50">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-          <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+      <div className="p-5 bg-card">
+        <div className="flex items-center gap-2 mb-3 pb-2.5 border-b border-border/50">
+          <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors cursor-pointer" />
+          <div className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-400 transition-colors cursor-pointer" />
+          <div className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400 transition-colors cursor-pointer" />
+          <span className="ml-2 text-xs text-muted-foreground font-mono">~/projects/power-tools</span>
         </div>
-        <pre className="text-[11px] overflow-x-auto leading-[1.6]">
+        <pre className="text-[11px] overflow-x-auto leading-[1.7]">
           <code>
             {tabs[activeTab].code.map((segment, i) => (
               <span key={i} className={`${segment.color} ${segment.font}`}>
