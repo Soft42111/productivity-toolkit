@@ -8,7 +8,6 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 import InteractiveParticles from "@/components/InteractiveParticles";
 import CodeTabs from "@/components/CodeTabs";
-import RobotHero from "@/components/RobotHero";
 import { useToast } from "@/hooks/use-toast";
 import type { User, Session } from '@supabase/supabase-js';
 import { 
@@ -168,29 +167,35 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col relative">
       <InteractiveParticles />
       <div className="max-w-7xl mx-auto px-4 py-6 flex-1 w-full relative z-10">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-5xl font-extrabold text-foreground tracking-tight">
-            Power Tools
-          </h1>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            {user ? (
-              <Button variant="ghost" onClick={handleSignOut} size="sm" className="h-8">
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
-            ) : (
-              <Button variant="ghost" onClick={() => navigate("/auth")} size="sm" className="h-8">
-                <LogIn className="h-4 w-4 mr-2" />
-                Sign In
-              </Button>
-            )}
+        <div className="mb-12">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-6xl font-extrabold text-foreground tracking-tight mb-2">
+                Power Tools
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                Essential productivity tools for modern workflows
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              {user ? (
+                <Button variant="ghost" onClick={handleSignOut} size="sm" className="h-8">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Button variant="ghost" onClick={() => navigate("/auth")} size="sm" className="h-8">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12 items-center">
-          <RobotHero />
-          <CodeTabs />
+          
+          <div className="max-w-3xl">
+            <CodeTabs />
+          </div>
         </div>
 
         {pinnedAppsList.length > 0 && (
