@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ChevronRight, Home } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -8,28 +9,28 @@ const FounderNote = () => {
 
   const slides = [
     {
-      title: "Science Exhibition Plan & Approach",
-      content: `My name is Saad Hassan. I worked as a digital marketer doing community management. I always saw problems which required immediate attention; most of them were being solved, but a few were there as "I'm fine." I thought if they can't solve it, then I should be fast and quick to do it. This app was one of the real-life issues I saw which was stalling productivity. On the special occasion of the science exhibition, I got the chance to showcase my skills.`
+      title: "The Spark: Science Exhibition Plan & Vision",
+      content: `My name is Saad Hassan, and I've worked as a digital marketer specializing in community management. Throughout my career, I've observed countless problems requiring immediate attention—most were being addressed, but several were dismissed with a simple "I'm fine." I realized that if existing solutions weren't adequate, I needed to act swiftly and decisively. This app emerged from a real productivity challenge I witnessed firsthand. The science exhibition presented the perfect opportunity to showcase my vision and technical abilities.`
     },
     {
-      title: "Project's Main Reason",
-      content: `I saw that everybody was too busy working on their phone and changing tabs for basic tasks. So, I got an idea: why don't we use an app which can perform day-to-day tasks? So, I made "Productivity Toolkit" (get-productive-vercel-app). This was not just an app but a chance to prove myself.`
+      title: "The Problem: Context Switching Kills Productivity",
+      content: `I noticed everyone constantly switching between phone tabs for basic tasks—a massive productivity drain. This observation sparked an idea: Why not create a unified app that consolidates everyday tools into one seamless experience? Thus, "Productivity Toolkit" was born. This wasn't merely an app; it was my opportunity to demonstrate that meaningful solutions can come from observing everyday frustrations and acting on them decisively.`
     },
     {
-      title: "Project Beta v1",
-      content: `In the beta version, it only had a calculator, typing practice, and to-do list. Everything was stored locally on localStorage().`
+      title: "Beta v1: The Foundation",
+      content: `The initial beta version featured three core tools: a calculator, typing practice, and a to-do list. All data was stored locally using browser localStorage, prioritizing simplicity and privacy. This minimal viable product validated the concept and laid the groundwork for exponential growth.`
     },
     {
-      title: "My Journey of Adding Apps",
-      content: `I used technologies mainly consisting of TS-based libraries and CSS frameworks like Tailwind. I generated a dozen apps; the best apps are: Calculator, Talk with AI, Typing Test, Weather Dashboard, Notes App, Currency Converter, Voice Recorder, Link Shortener, Quote Generator, and an app which translates Quran Ayah and Hadith in English. All apps powered by AI to ensure problems don't occur.`
+      title: "Scaling Up: The App Expansion Journey",
+      content: `I built the platform using modern TypeScript-based libraries and Tailwind CSS for rapid, responsive design. The toolkit has expanded to include dozens of productivity apps. Flagship features include: Calculator, AI Chat Assistant, Typing Speed Test, Real-time Weather Dashboard, Notes App, Currency Converter, Voice Recorder, Link Shortener, Quote Generator, and an Islamic Studies app featuring Quran translation and Hadith in English. Every tool is AI-enhanced to ensure reliability and intelligent error handling.`
     },
     {
-      title: "Integrating Gemini",
-      content: `After attending the exhibition, I got an idea which ignited me that I can integrate AI into this app. I made a lot of apps with it and regulated AI to help new users. I created an account on aistudio.google which allowed me to get free API keys allowing me to use the gemini-flash-2.5 model for my project. This basically works when we send a fetch() request through JavaScript and we put the API key in the .env file.`
+      title: "The AI Revolution: Integrating Gemini",
+      content: `After the exhibition, inspiration struck—I could elevate this platform by integrating cutting-edge AI capabilities. I created an account with Google AI Studio to access free API keys for the Gemini Flash 2.5 model. The integration works seamlessly: JavaScript fetch requests connect to the AI service, with API keys securely stored in environment variables. This architecture enables intelligent features across the entire platform while maintaining security and performance.`
     },
     {
-      title: "Adding Backend & Hosting",
-      content: `Adding backend to store progress and store all data and adding a sign-up with Google API. In all this journey, I took help from different AIs. I stored my app code on GitHub and made changes from there. I hosted the web-app on a public free domain and a free managed hosting.`
+      title: "Going Full Stack: Backend & Global Deployment",
+      content: `The platform evolved to include a robust backend infrastructure for persistent data storage and user progress tracking, complete with Google OAuth authentication. Throughout this journey, I leveraged various AI tools to accelerate development. The codebase lives on GitHub, enabling version control and collaborative potential. The web app is now deployed on a public domain with managed hosting, making these productivity tools accessible to users worldwide—completely free.`
     }
   ];
 
@@ -51,58 +52,66 @@ const FounderNote = () => {
       </Link>
 
       <div className="max-w-4xl w-full relative z-10">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4">
+        <div className="text-center mb-12 space-y-4">
+          <div className="inline-block">
+            <Badge className="mb-4 px-4 py-1 bg-gradient-to-r from-accent to-primary text-white border-0">
+              Origin Story
+            </Badge>
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-foreground via-accent to-primary bg-clip-text text-transparent mb-4 animate-fade-in">
             Founder's Note
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Click the content to progress through my journey
+          <p className="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto">
+            Click anywhere on the card to journey through the creation story
           </p>
         </div>
 
         <div
           onClick={nextSlide}
-          className="glass border border-border/50 rounded-2xl p-8 md:p-12 cursor-pointer transition-all duration-300 hover:border-accent/50 hover:shadow-xl group"
+          className="glass border-2 border-border/50 rounded-2xl p-8 md:p-12 cursor-pointer transition-all duration-500 hover:border-accent hover:shadow-2xl hover:shadow-accent/20 hover:scale-[1.02] group backdrop-blur-xl bg-card/50"
         >
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl md:text-3xl font-bold text-gradient bg-gradient-to-r from-accent to-primary">
+              <h2 className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent animate-fade-in">
                 {slides[currentSlide].title}
               </h2>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm font-semibold text-accent/80 bg-accent/10 px-3 py-1 rounded-full">
                 {currentSlide + 1} / {slides.length}
               </span>
             </div>
             
-            <p className="text-lg md:text-xl leading-relaxed text-foreground font-medium">
+            <p className="text-base md:text-lg leading-relaxed text-foreground/90 font-normal tracking-wide">
               {slides[currentSlide].content}
             </p>
 
-            <div className="flex items-center justify-between pt-6 border-t border-border/50">
+            <div className="flex items-center justify-between pt-6 border-t-2 border-accent/20">
               <div className="flex gap-2">
                 {slides.map((_, index) => (
                   <div
                     key={index}
-                    className={`h-2 rounded-full transition-all duration-300 ${
+                    className={`h-2.5 rounded-full transition-all duration-500 ${
                       index === currentSlide
-                        ? "w-12 bg-accent"
-                        : "w-2 bg-muted-foreground/30"
+                        ? "w-16 bg-gradient-to-r from-accent to-primary shadow-lg shadow-accent/50"
+                        : "w-2.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"
                     }`}
                   />
                 ))}
               </div>
               
-              <div className="flex items-center gap-2 text-muted-foreground text-sm group-hover:text-accent transition-colors">
-                <span>Click to continue</span>
-                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <div className="flex items-center gap-2 text-muted-foreground text-sm font-medium group-hover:text-accent transition-all duration-300">
+                <span className="hidden sm:inline">Click to continue</span>
+                <ChevronRight className="h-5 w-5 group-hover:translate-x-2 transition-transform duration-300" />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-12 text-center space-y-3 animate-fade-in">
+          <p className="text-lg font-semibold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
+            Built with passion, precision, and purpose
+          </p>
           <p className="text-sm text-muted-foreground">
-            Built with passion by Saad Hassan
+            — Saad Hassan, Founder & Developer
           </p>
         </div>
       </div>

@@ -231,29 +231,56 @@ const Index = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16 lg:py-24 flex-1 w-full relative z-10">
         {/* Introduction */}
-        <div className="mb-24 text-center max-w-3xl mx-auto space-y-8 relative">
+        <div className="mb-24 text-center max-w-4xl mx-auto space-y-8 relative">
           <div 
             className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-gradient-to-br from-primary/20 via-accent/10 to-transparent rounded-full blur-3xl pointer-events-none"
             style={{ transform: `translate(-50%, ${scrollY * 0.3}px)` }}
           />
+          
+          {/* Badge */}
+          <div className="inline-block animate-fade-in">
+            <Badge className="px-4 py-1.5 bg-gradient-to-r from-accent/20 to-primary/20 text-accent border-accent/30 hover:scale-105 transition-transform">
+              <Sparkles className="h-3 w-3 mr-1.5 inline" />
+              40+ Productivity Tools
+            </Badge>
+          </div>
+          
           <h2 
-            className="text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight relative"
+            className="text-5xl lg:text-7xl font-bold text-foreground leading-tight tracking-tight relative animate-fade-in"
             style={{ transform: `translateY(${scrollY * 0.1}px)` }}
           >
             Essential tools for
-            <span className="block text-gradient bg-gradient-to-r from-accent to-primary">modern workflows</span>
+            <span className="block text-gradient bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent mt-2">
+              modern workflows
+            </span>
           </h2>
           <p 
-            className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto relative"
+            className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto relative animate-fade-in"
             style={{ transform: `translateY(${scrollY * 0.15}px)` }}
           >
-            Streamline your daily tasks with a curated collection of productivity tools.
+            Streamline your daily tasks with our curated collection of productivity tools. No installation required—everything works instantly in your browser.
             Fast, simple, and always accessible.
           </p>
           
+          {/* Statistics Section */}
+          <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-8 animate-fade-in">
+            <div className="text-center p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all duration-300 hover:scale-105">
+              <div className="text-3xl lg:text-4xl font-bold text-gradient bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">40+</div>
+              <div className="text-sm text-muted-foreground mt-1">Tools Available</div>
+            </div>
+            <div className="text-center p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all duration-300 hover:scale-105">
+              <div className="text-3xl lg:text-4xl font-bold text-gradient bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">100%</div>
+              <div className="text-sm text-muted-foreground mt-1">Free Forever</div>
+            </div>
+            <div className="text-center p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all duration-300 hover:scale-105">
+              <div className="text-3xl lg:text-4xl font-bold text-gradient bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">0</div>
+              <div className="text-sm text-muted-foreground mt-1">Installs Needed</div>
+            </div>
+          </div>
+          
           {/* Search - How do I find what I need? */}
           <div 
-            className="max-w-md mx-auto pt-4 relative"
+            className="max-w-md mx-auto pt-8 relative animate-fade-in"
             style={{ transform: `translateY(${scrollY * 0.05}px)` }}
           >
             <div className="relative group">
@@ -262,10 +289,10 @@ const Index = () => {
                 placeholder="Search tools..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-12 pl-12 pr-4 rounded-xl border border-border bg-background/60 backdrop-blur-sm text-sm shadow-sm transition-all duration-300 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:shadow-md"
+                className="w-full h-14 pl-14 pr-4 rounded-2xl border-2 border-border bg-background/60 backdrop-blur-sm text-sm shadow-lg transition-all duration-300 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:border-accent focus-visible:shadow-xl"
               />
               <svg
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors group-focus-within:text-accent"
+                className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors group-focus-within:text-accent"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -292,9 +319,12 @@ const Index = () => {
         {filteredPinnedApps.length > 0 && (
           <div className="mb-20" id="pinned">
             <div className="mb-8">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                Quick Access
-              </h3>
+              <div className="flex items-center gap-3 mb-3">
+                <Sparkles className="h-5 w-5 text-accent" />
+                <h3 className="text-lg font-bold text-foreground uppercase tracking-wider">
+                  Quick Access
+                </h3>
+              </div>
               <p className="text-base text-muted-foreground">
                 Your most-used tools, always at hand
               </p>
@@ -310,16 +340,17 @@ const Index = () => {
                     className="group"
                     style={{ animationDelay: `${index * 40}ms` }}
                   >
-                    <Card className="aspect-square border border-border/50 glass transition-all duration-300 hover:border-accent/50 hover:scale-[1.03] hover:shadow-xl relative overflow-hidden animate-fade-in">
+                    <Card className="aspect-square border-2 border-border/50 glass transition-all duration-300 hover:border-accent hover:scale-105 hover:shadow-2xl hover:shadow-accent/20 relative overflow-hidden animate-fade-in backdrop-blur-xl">
+                      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                       <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
-                        <Icon className="w-10 h-10 lg:w-12 lg:h-12 text-foreground mb-3 transition-all duration-300 group-hover:scale-110 group-hover:text-accent" />
-                        <h3 className="text-xs font-medium text-center leading-tight text-foreground group-hover:text-accent transition-colors">{app.title}</h3>
+                        <Icon className="w-10 h-10 lg:w-12 lg:h-12 text-foreground mb-3 transition-all duration-300 group-hover:scale-125 group-hover:text-accent drop-shadow-lg" />
+                        <h3 className="text-xs font-semibold text-center leading-tight text-foreground group-hover:text-accent transition-colors">{app.title}</h3>
                       </div>
                       <Button 
                         size="icon" 
                         variant="ghost" 
                         onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
-                        className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
                       >
                         <Pin className="h-3 w-3 text-accent" />
                       </Button>
@@ -334,11 +365,14 @@ const Index = () => {
         {/* Featured Apps - Best Tools */}
         <div className="mb-20" id="featured">
           <div className="mb-8">
-            <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
-              Featured Tools
-            </h3>
+            <div className="flex items-center gap-3 mb-3">
+              <Zap className="h-5 w-5 text-accent" />
+              <h3 className="text-lg font-bold text-foreground uppercase tracking-wider">
+                Featured Tools
+              </h3>
+            </div>
             <p className="text-base text-muted-foreground">
-              Our most popular and powerful utilities
+              Our most powerful and popular utilities
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-fr">
@@ -353,17 +387,18 @@ const Index = () => {
                   className={`group ${isLarge ? 'sm:col-span-2 sm:row-span-2' : ''}`}
                   style={{ animationDelay: `${index * 40}ms` }}
                 >
-                  <Card className={`${isLarge ? 'aspect-square' : 'aspect-square'} border border-border/50 glass transition-all duration-300 hover:border-accent/50 hover:scale-[1.03] hover:shadow-xl relative overflow-hidden animate-fade-in`}>
+                  <Card className={`${isLarge ? 'aspect-square' : 'aspect-square'} border-2 border-border/50 glass transition-all duration-300 hover:border-accent hover:scale-105 hover:shadow-2xl hover:shadow-accent/20 relative overflow-hidden animate-fade-in backdrop-blur-xl`}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
-                      <Icon className={`${isLarge ? 'w-16 h-16 lg:w-20 lg:h-20' : 'w-10 h-10 lg:w-12 lg:h-12'} text-foreground mb-3 transition-all duration-300 group-hover:scale-110 group-hover:text-accent`} />
-                      <h3 className={`${isLarge ? 'text-sm lg:text-base' : 'text-xs'} font-medium text-center leading-tight text-foreground group-hover:text-accent transition-colors`}>{app.title}</h3>
+                      <Icon className={`${isLarge ? 'w-16 h-16 lg:w-20 lg:h-20' : 'w-10 h-10 lg:w-12 lg:h-12'} text-foreground mb-3 transition-all duration-300 group-hover:scale-125 group-hover:text-accent drop-shadow-lg`} />
+                      <h3 className={`${isLarge ? 'text-sm lg:text-base' : 'text-xs'} font-semibold text-center leading-tight text-foreground group-hover:text-accent transition-colors`}>{app.title}</h3>
                       {isLarge && <p className="text-[10px] lg:text-xs text-muted-foreground text-center mt-2 px-2">{app.description}</p>}
                     </div>
                     <Button 
                       size="icon" 
                       variant="ghost" 
                       onClick={(e) => { e.preventDefault(); togglePin(app.path); }} 
-                      className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 h-7 w-7 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
                     >
                       {isPinned ? <Pin className="h-3 w-3 text-accent" /> : <PinOff className="h-3 w-3 text-muted-foreground" />}
                     </Button>
