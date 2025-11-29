@@ -6,6 +6,7 @@ import { Download, Eraser, Trash2, Palette } from "lucide-react";
 import HomeButton from "@/components/HomeButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import AuthPrompt from "@/components/AuthPrompt";
 
 const DrawingPad = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -124,6 +125,7 @@ const DrawingPad = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
+      <AuthPrompt appName="Drawing Pad" />
       <HomeButton />
       <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />

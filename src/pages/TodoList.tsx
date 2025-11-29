@@ -8,6 +8,7 @@ import { NavLink } from "@/components/NavLink";
 import { Search, Trash2, Plus, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import AuthPrompt from "@/components/AuthPrompt";
 
 interface Todo {
   id: string;
@@ -84,6 +85,7 @@ const TodoList = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
+      <AuthPrompt appName="Todo List" />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex justify-between items-center mb-6">
           <NavLink to="/" />

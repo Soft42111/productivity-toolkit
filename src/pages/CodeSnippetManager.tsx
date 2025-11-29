@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import HomeButton from "@/components/HomeButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import AuthPrompt from "@/components/AuthPrompt";
 
 interface Snippet {
   id: string;
@@ -88,6 +89,7 @@ const CodeSnippetManager = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
+      <AuthPrompt appName="Code Snippets" />
       <HomeButton />
       <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
