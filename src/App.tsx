@@ -41,6 +41,11 @@ import IslamicReminders from "./pages/IslamicReminders";
 import QiblaCompass from "./pages/QiblaCompass";
 import IslamicCalendar from "./pages/IslamicCalendar";
 import FounderNote from "./pages/FounderNote";
+import DrawingPad from "./pages/DrawingPad";
+import GradientGenerator from "./pages/GradientGenerator";
+import ColorPaletteGenerator from "./pages/ColorPaletteGenerator";
+import ImageCompressor from "./pages/ImageCompressor";
+import CodeSnippetManager from "./pages/CodeSnippetManager";
 
 const queryClient = new QueryClient();
 
@@ -86,6 +91,11 @@ const App = () => (
           <Route path="/qibla-compass" element={<QiblaCompass />} />
           <Route path="/islamic-calendar" element={<IslamicCalendar />} />
           <Route path="/founder-note" element={<FounderNote />} />
+          <Route path="/drawing-pad" element={<DrawingPad />} />
+          <Route path="/gradient-generator" element={<GradientGenerator />} />
+          <Route path="/color-palette-generator" element={<ColorPaletteGenerator />} />
+          <Route path="/image-compressor" element={<ImageCompressor />} />
+          <Route path="/code-snippet-manager" element={<CodeSnippetManager />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
