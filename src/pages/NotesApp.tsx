@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
+import AuthPrompt from "@/components/AuthPrompt";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Save, FileText } from "lucide-react";
 
@@ -79,6 +80,7 @@ const NotesApp = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary">
+      <AuthPrompt appName="Notes" />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="flex justify-between items-center mb-6">
           <NavLink to="/" />
