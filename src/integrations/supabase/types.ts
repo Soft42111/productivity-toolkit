@@ -319,6 +319,7 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      unconfirm_user_email: { Args: { p_user_id: string }; Returns: boolean }
       verify_email_code: {
         Args: { p_code: string; p_user_id: string }
         Returns: {

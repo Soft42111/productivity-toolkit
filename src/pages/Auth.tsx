@@ -91,11 +91,20 @@ const Auth = () => {
           // Immediately sign out to prevent auto-login
           await supabase.auth.signOut();
           
+          // Unconfirm the user's email (since auto_confirm is enabled, we need to manually unconfirm)
+          const { error: unconfirmError } = await supabase.rpc('unconfirm_user_email', {
+            p_user_id: signUpData.user.id,
+          });
+
+          if (unconfirmError) {
+            console.error("Error unconfirming email:", unconfirmError);
+          }
+          
           // Generate 6-digit verification code
           const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
           const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
-          // Store verification code in database using service role
+          // Store verification code in database
           const { error: codeError } = await supabase.rpc('insert_verification_code', {
             p_user_id: signUpData.user.id,
             p_code: verificationCode,
