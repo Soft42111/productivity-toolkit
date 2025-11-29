@@ -61,6 +61,48 @@ const DrawingPad = () => {
     setIsDrawing(false);
   };
 
+  // Touch event handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    setIsDrawing(true);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touch = e.touches[0];
+    const x = (touch.clientX - rect.left) * scaleX;
+    const y = (touch.clientY - rect.top) * scaleY;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const touch = e.touches[0];
+    const x = (touch.clientX - rect.left) * scaleX;
+    const y = (touch.clientY - rect.top) * scaleY;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.strokeStyle = isEraser ? "#ffffff" : color;
+    ctx.lineWidth = brushSize[0];
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    setIsDrawing(false);
+  };
+
   const clearCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -158,6 +200,9 @@ const DrawingPad = () => {
             onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseLeave={stopDrawing}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
             className="border border-border rounded-lg w-full bg-white cursor-crosshair"
             style={{ touchAction: "none" }}
           />
