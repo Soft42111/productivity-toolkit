@@ -45,7 +45,11 @@ import {
   Book,
   Bell,
   Compass,
-  Calendar
+  Calendar,
+  PenTool,
+  Wand2,
+  Image as ImageIcon,
+  FileCode2
 } from "lucide-react";
 
 const Index = () => {
@@ -157,6 +161,11 @@ const Index = () => {
     { title: "Quote Generator", description: "Generate random quotes", icon: Quote, path: "/quotes", gradient: "from-indigo-500 to-purple-500", isBest: false },
     { title: "Countdown Timer", description: "Set countdown timers", icon: Timer, path: "/countdown", gradient: "from-orange-500 to-yellow-500", isBest: false },
     { title: "User Profile", description: "Manage your profile", icon: UserCircle, path: "/profile", gradient: "from-gray-500 to-slate-500", isBest: false },
+    { title: "Drawing Pad", description: "Create digital sketches", icon: PenTool, path: "/drawing-pad", gradient: "from-pink-500 to-rose-500", isBest: true },
+    { title: "Gradient Generator", description: "Create beautiful CSS gradients", icon: Wand2, path: "/gradient-generator", gradient: "from-violet-500 to-fuchsia-500", isBest: true },
+    { title: "Color Palette Generator", description: "Generate harmonious color schemes", icon: Palette, path: "/color-palette-generator", gradient: "from-cyan-500 to-blue-500", isBest: true },
+    { title: "Image Compressor", description: "Reduce image file sizes", icon: ImageIcon, path: "/image-compressor", gradient: "from-green-500 to-emerald-500", isBest: true },
+    { title: "Code Snippet Manager", description: "Save and organize code snippets", icon: FileCode2, path: "/code-snippet-manager", gradient: "from-slate-500 to-zinc-500", isBest: true },
   ];
 
   const bestApps = allApps.filter(app => app.isBest);
@@ -241,7 +250,7 @@ const Index = () => {
           <div className="inline-block animate-fade-in">
             <Badge className="px-4 py-1.5 bg-gradient-to-r from-accent/20 to-primary/20 text-accent border-accent/30 hover:scale-105 transition-transform">
               <Sparkles className="h-3 w-3 mr-1.5 inline" />
-              40+ Productivity Tools
+              45+ Productivity Tools
             </Badge>
           </div>
           
@@ -265,7 +274,7 @@ const Index = () => {
           {/* Statistics Section */}
           <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-8 animate-fade-in">
             <div className="text-center p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all duration-300 hover:scale-105">
-              <div className="text-3xl lg:text-4xl font-bold text-gradient bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">40+</div>
+              <div className="text-3xl lg:text-4xl font-bold text-gradient bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">45+</div>
               <div className="text-sm text-muted-foreground mt-1">Tools Available</div>
             </div>
             <div className="text-center p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all duration-300 hover:scale-105">
