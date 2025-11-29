@@ -99,15 +99,16 @@ const VerifyEmail = () => {
       if (error) throw error;
 
       if (data && data[0]?.success) {
+        // Email is now confirmed in Supabase auth
         toast({
-          title: "Email verified successfully!",
-          description: "Redirecting you to sign in...",
+          title: "Email verified!",
+          description: "Signing you in...",
         });
         
-        // Wait a moment then redirect to auth page
+        // Redirect to home - user is now verified
         setTimeout(() => {
           navigate("/auth");
-        }, 1500);
+        }, 1000);
       } else {
         toast({
           title: "Verification failed",
