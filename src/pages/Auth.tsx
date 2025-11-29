@@ -72,7 +72,7 @@ const Auth = () => {
       setLoading(true);
 
       if (isSignUp) {
-        const { data: signUpData, error } = await supabase.auth.signUp({
+        const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -82,44 +82,12 @@ const Auth = () => {
 
         if (error) throw error;
 
-        if (signUpData.user) {
-          // Generate 6-digit code
-          const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-          const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
-
-          // Store verification code in database
-          const { error: codeError } = await supabase.rpc('insert_verification_code', {
-            p_user_id: signUpData.user.id,
-            p_code: verificationCode,
-            p_expires_at: expiresAt,
-          });
-
-          if (codeError) {
-            console.error("Error storing verification code:", codeError);
-            throw codeError;
-          }
-
-          // Send verification email
-          const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
-            body: {
-              email,
-              code: verificationCode,
-            },
-          });
-
-          if (emailError) {
-            console.error("Error sending verification email:", emailError);
-            throw emailError;
-          }
-
-          // Redirect to verification page
-          navigate(`/verify-email?userId=${signUpData.user.id}`);
-          
-          toast({
-            title: "Verification email sent!",
-            description: "Check your inbox for the verification code",
-          });
-        }
+        toast({
+          title: "Account created!",
+          description: "You've successfully signed up",
+        });
+        
+        // Auto sign-in is handled by onAuthStateChange
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
