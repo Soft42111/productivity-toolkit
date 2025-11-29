@@ -39,7 +39,8 @@ const Auth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
       setUser(newSession?.user ?? null);
-      if (newSession) {
+      // Only redirect if user has verified their email
+      if (newSession?.user?.email_confirmed_at) {
         navigate("/");
       }
     });
@@ -48,7 +49,8 @@ const Auth = () => {
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
-      if (currentSession) {
+      // Only redirect if user has verified their email
+      if (currentSession?.user?.email_confirmed_at) {
         navigate("/");
       }
     });
@@ -72,6 +74,9 @@ const Auth = () => {
       setLoading(true);
 
       if (isSignUp) {
+        // First, sign out any existing session
+        await supabase.auth.signOut();
+        
         const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
@@ -83,11 +88,14 @@ const Auth = () => {
         if (error) throw error;
 
         if (signUpData.user) {
+          // Immediately sign out to prevent auto-login
+          await supabase.auth.signOut();
+          
           // Generate 6-digit verification code
           const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
           const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 minutes
 
-          // Store verification code in database
+          // Store verification code in database using service role
           const { error: codeError } = await supabase.rpc('insert_verification_code', {
             p_user_id: signUpData.user.id,
             p_code: verificationCode,
@@ -112,13 +120,15 @@ const Auth = () => {
             throw emailError;
           }
 
-          // Redirect to verification page
-          navigate(`/verify-email?userId=${signUpData.user.id}`);
-          
           toast({
             title: "Verification email sent!",
             description: "Check your inbox for the verification code",
           });
+          
+          // Redirect to verification page after a brief delay
+          setTimeout(() => {
+            navigate(`/verify-email?userId=${signUpData.user.id}&email=${encodeURIComponent(email)}`);
+          }, 500);
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({

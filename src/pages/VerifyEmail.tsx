@@ -11,11 +11,61 @@ import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 const VerifyEmail = () => {
   const [loading, setLoading] = useState(false);
   const [code, setCode] = useState("");
+  const [resending, setResending] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const userId = searchParams.get("userId");
+  const email = searchParams.get("email");
+
+  const resendCode = async () => {
+    if (!userId || !email) {
+      toast({
+        title: "Error",
+        description: "Missing user information",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setResending(true);
+
+      // Generate new code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+      // Store new code
+      const { error: codeError } = await supabase.rpc('insert_verification_code', {
+        p_user_id: userId,
+        p_code: verificationCode,
+        p_expires_at: expiresAt,
+      });
+
+      if (codeError) throw codeError;
+
+      // Send email
+      const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+        body: { email, code: verificationCode },
+      });
+
+      if (emailError) throw emailError;
+
+      toast({
+        title: "Code resent!",
+        description: "Check your inbox for the new verification code",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to resend code",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setResending(false);
+    }
+  };
 
   useEffect(() => {
     // Check if already verified/logged in
@@ -50,10 +100,14 @@ const VerifyEmail = () => {
 
       if (data && data[0]?.success) {
         toast({
-          title: "Email verified!",
-          description: "You can now sign in with your credentials",
+          title: "Email verified successfully!",
+          description: "Redirecting you to sign in...",
         });
-        navigate("/auth");
+        
+        // Wait a moment then redirect to auth page
+        setTimeout(() => {
+          navigate("/auth");
+        }, 1500);
       } else {
         toast({
           title: "Verification failed",
@@ -85,7 +139,11 @@ const VerifyEmail = () => {
             Verify Your Email
           </CardTitle>
           <CardDescription className="text-base">
-            Enter the 6-digit code sent to your email
+            {email ? (
+              <>Enter the 6-digit code sent to <strong>{email}</strong></>
+            ) : (
+              "Enter the 6-digit code sent to your email"
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,16 +176,28 @@ const VerifyEmail = () => {
                 "Verify Email"
               )}
             </Button>
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <Button
                 type="button"
                 variant="link"
                 onClick={() => navigate("/auth")}
-                disabled={loading}
+                disabled={loading || resending}
                 className="text-sm"
               >
                 Back to sign in
               </Button>
+              <div className="text-sm text-muted-foreground">
+                Didn't receive the code?{" "}
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={resendCode}
+                  disabled={loading || resending}
+                  className="text-sm p-0 h-auto font-normal"
+                >
+                  {resending ? "Sending..." : "Resend code"}
+                </Button>
+              </div>
             </div>
           </form>
         </CardContent>
