@@ -12,3 +12,12 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /auth
+Disallow: /verify-email
+
+# Sitemap
+Sitemap: https://powertools.lovable.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
