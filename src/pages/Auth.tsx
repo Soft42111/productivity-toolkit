@@ -156,16 +156,51 @@ const Auth = () => {
             </svg>
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-            Temporarily Locked
+            {isSignUp ? "Create Account" : "Welcome Back"}
           </CardTitle>
           <CardDescription className="text-base">
-            Authentication is temporarily unavailable. All features are accessible without sign-in.
+            {isSignUp ? "Sign up to access all features" : "Sign in to your account"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="text-center">
-          <Button onClick={() => navigate("/")} className="w-full">
-            Go to Home
-          </Button>
+        <CardContent>
+          <form onSubmit={handleAuth} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSignUp ? "Sign Up" : "Sign In"}
+            </Button>
+          </form>
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>
