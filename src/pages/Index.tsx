@@ -49,7 +49,8 @@ import {
   PenTool,
   Wand2,
   Image as ImageIcon,
-  FileCode2
+  FileCode2,
+  Sparkle
 } from "lucide-react";
 
 const Index = () => {
@@ -165,6 +166,7 @@ const Index = () => {
     { title: "Gradient Generator", description: "Create beautiful CSS gradients", icon: Wand2, path: "/gradient-generator", gradient: "from-violet-500 to-fuchsia-500", isBest: true },
     { title: "Color Palette Generator", description: "Generate harmonious color schemes", icon: Palette, path: "/color-palette-generator", gradient: "from-cyan-500 to-blue-500", isBest: true },
     { title: "Image Compressor", description: "Reduce image file sizes", icon: ImageIcon, path: "/image-compressor", gradient: "from-green-500 to-emerald-500", isBest: true },
+    { title: "Image Enhancer", description: "Enhance images with AI", icon: Sparkle, path: "/image-enhancer", gradient: "from-purple-500 to-indigo-500", isBest: true },
     { title: "Code Snippet Manager", description: "Save and organize code snippets", icon: FileCode2, path: "/code-snippet-manager", gradient: "from-slate-500 to-zinc-500", isBest: true },
   ];
 
@@ -250,7 +252,7 @@ const Index = () => {
           <div className="inline-block animate-fade-in">
             <Badge className="px-4 py-1.5 bg-gradient-to-r from-accent/20 to-primary/20 text-accent border-accent/30 hover:scale-105 transition-transform">
               <Sparkles className="h-3 w-3 mr-1.5 inline" />
-              45+ Productivity Tools
+              46+ Productivity Tools
             </Badge>
           </div>
           
@@ -274,7 +276,7 @@ const Index = () => {
           {/* Statistics Section */}
           <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-8 animate-fade-in">
             <div className="text-center p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all duration-300 hover:scale-105">
-              <div className="text-3xl lg:text-4xl font-bold text-gradient bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">45+</div>
+              <div className="text-3xl lg:text-4xl font-bold text-gradient bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">46+</div>
               <div className="text-sm text-muted-foreground mt-1">Tools Available</div>
             </div>
             <div className="text-center p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/50 hover:border-accent/50 transition-all duration-300 hover:scale-105">
