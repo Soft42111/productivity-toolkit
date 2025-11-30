@@ -14,12 +14,10 @@ const ImageEnhancer = () => {
   const [enhancedImage, setEnhancedImage] = useState<string | null>(null);
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhancementLevel, setEnhancementLevel] = useState([50]);
+  const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const processImageFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({
         title: "Invalid file type",
@@ -35,6 +33,40 @@ const ImageEnhancer = () => {
       setEnhancedImage(null);
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processImageFile(file);
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processImageFile(file);
+    }
   };
 
   const enhanceImage = async () => {
@@ -97,11 +129,27 @@ const ImageEnhancer = () => {
         <Card className="p-6 max-w-4xl mx-auto">
           <div className="space-y-6">
             <div className="flex items-center justify-center">
-              <label htmlFor="image-upload">
-                <div className="cursor-pointer border-2 border-dashed border-border rounded-lg p-8 hover:border-primary transition-colors">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload an image
+              <label 
+                htmlFor="image-upload"
+                onDragEnter={handleDragEnter}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className="w-full"
+              >
+                <div className={`cursor-pointer border-2 border-dashed rounded-lg p-12 transition-all ${
+                  isDragging 
+                    ? "border-primary bg-primary/5 scale-105" 
+                    : "border-border hover:border-primary"
+                }`}>
+                  <Upload className={`h-12 w-12 mx-auto mb-4 transition-colors ${
+                    isDragging ? "text-primary" : "text-muted-foreground"
+                  }`} />
+                  <p className="text-sm text-muted-foreground text-center mb-2">
+                    {isDragging ? "Drop your image here" : "Drag and drop an image here"}
+                  </p>
+                  <p className="text-xs text-muted-foreground text-center">
+                    or click to browse
                   </p>
                 </div>
                 <input
