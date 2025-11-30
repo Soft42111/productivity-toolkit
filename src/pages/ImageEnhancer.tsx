@@ -8,6 +8,10 @@ import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import {
+  ReactCompareSlider,
+  ReactCompareSliderImage,
+} from "react-compare-slider";
 
 const ImageEnhancer = () => {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
@@ -74,10 +78,25 @@ const ImageEnhancer = () => {
 
     setIsEnhancing(true);
     try {
+      // Create more specific enhancement prompts
+      let prompt = "";
+      const level = enhancementLevel[0];
+      
+      if (level >= 75) {
+        prompt = "Transform this image to professional quality: dramatically increase sharpness and clarity, enhance colors to be vibrant and rich, perfect the lighting and contrast, remove any noise or blur, make details crisp and clear, and optimize overall image quality to look stunning.";
+      } else if (level >= 50) {
+        prompt = "Enhance this image significantly: improve sharpness and definition, boost color vibrancy and saturation, balance brightness and contrast for better visual appeal, reduce noise, and make the image look clearer and more professional.";
+      } else if (level >= 25) {
+        prompt = "Moderately enhance this image: gently improve sharpness, slightly boost colors and contrast, balance the lighting, and make the image look cleaner and more polished while keeping it natural.";
+      } else {
+        prompt = "Apply subtle enhancements: slightly improve clarity and sharpness, make minor adjustments to brightness and color balance, keep the image looking very natural with minimal changes.";
+      }
+
       const { data, error } = await supabase.functions.invoke("enhance-image", {
         body: {
           image: originalImage,
-          enhancementLevel: enhancementLevel[0],
+          enhancementLevel: level,
+          prompt: prompt,
         },
       });
 
@@ -168,12 +187,21 @@ const ImageEnhancer = () => {
                   <label className="text-sm font-medium">
                     Enhancement Level: {enhancementLevel[0]}%
                   </label>
+                  <p className="text-xs text-muted-foreground">
+                    {enhancementLevel[0] >= 75
+                      ? "Maximum: Professional quality with dramatic improvements"
+                      : enhancementLevel[0] >= 50
+                      ? "High: Significant enhancements to clarity and color"
+                      : enhancementLevel[0] >= 25
+                      ? "Medium: Moderate improvements, natural looking"
+                      : "Low: Subtle enhancements, very natural"}
+                  </p>
                   <Slider
                     value={enhancementLevel}
                     onValueChange={setEnhancementLevel}
                     min={0}
                     max={100}
-                    step={10}
+                    step={25}
                     className="w-full"
                   />
                 </div>
@@ -199,21 +227,39 @@ const ImageEnhancer = () => {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Original</h3>
-                    <img
-                      src={originalImage}
-                      alt="Original"
-                      className="w-full rounded-lg border border-border"
-                    />
-                  </div>
-                  {enhancedImage && (
+                <div className="space-y-4">
+                  {enhancedImage ? (
                     <div>
-                      <h3 className="text-sm font-medium mb-2">Enhanced</h3>
+                      <h3 className="text-sm font-medium mb-4 text-center">
+                        Drag the slider to compare before and after
+                      </h3>
+                      <div className="rounded-lg overflow-hidden border border-border">
+                        <ReactCompareSlider
+                          itemOne={
+                            <ReactCompareSliderImage
+                              src={originalImage}
+                              alt="Original"
+                            />
+                          }
+                          itemTwo={
+                            <ReactCompareSliderImage
+                              src={enhancedImage}
+                              alt="Enhanced"
+                            />
+                          }
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 mt-2 text-xs text-muted-foreground text-center">
+                        <div>← Original</div>
+                        <div>Enhanced →</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-sm font-medium mb-2">Preview</h3>
                       <img
-                        src={enhancedImage}
-                        alt="Enhanced"
+                        src={originalImage}
+                        alt="Original"
                         className="w-full rounded-lg border border-border"
                       />
                     </div>
