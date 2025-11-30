@@ -26,12 +26,74 @@ const ImageEnhancer = () => {
     level: number
   ): ImageData => {
     const data = imageData.data;
+    const width = imageData.width;
+    const height = imageData.height;
     const factor = level / 100;
 
-    // Calculate enhancement parameters based on level
-    const brightness = 1 + (factor * 0.3); // Up to 30% brighter
-    const contrast = 1 + (factor * 0.5); // Up to 50% more contrast
-    const saturation = 1 + (factor * 0.4); // Up to 40% more saturated
+    // Step 1: Noise reduction for smoother results
+    if (factor > 0.3) {
+      const newData = new Uint8ClampedArray(data);
+      const radius = Math.floor(factor * 2);
+      
+      for (let y = radius; y < height - radius; y++) {
+        for (let x = radius; x < width - radius; x++) {
+          let r = 0, g = 0, b = 0, count = 0;
+          
+          for (let dy = -radius; dy <= radius; dy++) {
+            for (let dx = -radius; dx <= radius; dx++) {
+              const idx = ((y + dy) * width + (x + dx)) * 4;
+              r += data[idx];
+              g += data[idx + 1];
+              b += data[idx + 2];
+              count++;
+            }
+          }
+          
+          const idx = (y * width + x) * 4;
+          newData[idx] = r / count;
+          newData[idx + 1] = g / count;
+          newData[idx + 2] = b / count;
+        }
+      }
+      
+      data.set(newData);
+    }
+
+    // Step 2: Enhanced sharpening with unsharp mask
+    if (factor > 0.4) {
+      const sharpenKernel = [
+        0, -1, 0,
+        -1, 5 + factor * 2, -1,
+        0, -1, 0
+      ];
+      
+      const newData = new Uint8ClampedArray(data);
+      
+      for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+          for (let c = 0; c < 3; c++) {
+            let sum = 0;
+            let ki = 0;
+            
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                const idx = ((y + dy) * width + (x + dx)) * 4 + c;
+                sum += data[idx] * sharpenKernel[ki++];
+              }
+            }
+            
+            const idx = (y * width + x) * 4 + c;
+            newData[idx] = Math.max(0, Math.min(255, sum));
+          }
+        }
+      }
+      
+      data.set(newData);
+    }
+
+    // Step 3: Brightness and contrast adjustments
+    const brightness = 1 + (factor * 0.35);
+    const contrast = 1 + (factor * 0.6);
 
     for (let i = 0; i < data.length; i += 4) {
       let r = data[i];
@@ -48,24 +110,56 @@ const ImageEnhancer = () => {
       g = ((g - 128) * contrast) + 128;
       b = ((b - 128) * contrast) + 128;
 
-      // Apply saturation
-      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-      r = gray + (r - gray) * saturation;
-      g = gray + (g - gray) * saturation;
-      b = gray + (b - gray) * saturation;
-
-      // Sharpen (simple unsharp mask approximation)
-      if (factor > 0.5) {
-        const sharpenAmount = (factor - 0.5) * 2;
-        r = r + (r - gray) * sharpenAmount * 0.3;
-        g = g + (g - gray) * sharpenAmount * 0.3;
-        b = b + (b - gray) * sharpenAmount * 0.3;
-      }
-
-      // Clamp values
       data[i] = Math.max(0, Math.min(255, r));
       data[i + 1] = Math.max(0, Math.min(255, g));
       data[i + 2] = Math.max(0, Math.min(255, b));
+    }
+
+    // Step 4: Enhanced color saturation with vibrance
+    const saturation = 1 + (factor * 0.5);
+    
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+      const maxChannel = Math.max(r, g, b);
+      const minChannel = Math.min(r, g, b);
+      const chromaDiff = maxChannel - minChannel;
+      
+      // Apply vibrance (affects less saturated colors more)
+      const vibranceFactor = 1 - (chromaDiff / 255);
+      const adjustedSat = 1 + (saturation - 1) * vibranceFactor;
+      
+      data[i] = Math.max(0, Math.min(255, gray + (r - gray) * adjustedSat));
+      data[i + 1] = Math.max(0, Math.min(255, gray + (g - gray) * adjustedSat));
+      data[i + 2] = Math.max(0, Math.min(255, gray + (b - gray) * adjustedSat));
+    }
+
+    // Step 5: Edge enhancement for extra clarity
+    if (factor > 0.6) {
+      const edgeStrength = (factor - 0.6) * 2.5;
+      
+      for (let y = 1; y < height - 1; y++) {
+        for (let x = 1; x < width - 1; x++) {
+          for (let c = 0; c < 3; c++) {
+            const idx = (y * width + x) * 4 + c;
+            const center = data[idx];
+            
+            // Calculate gradient
+            const left = data[((y) * width + (x - 1)) * 4 + c];
+            const right = data[((y) * width + (x + 1)) * 4 + c];
+            const top = data[((y - 1) * width + x) * 4 + c];
+            const bottom = data[((y + 1) * width + x) * 4 + c];
+            
+            const gradient = Math.abs(right - left) + Math.abs(bottom - top);
+            const enhancement = gradient * edgeStrength * 0.1;
+            
+            data[idx] = Math.max(0, Math.min(255, center + enhancement));
+          }
+        }
+      }
     }
 
     return imageData;
@@ -158,19 +252,19 @@ const ImageEnhancer = () => {
       // Get the canvas-enhanced image
       const canvasEnhanced = canvas.toDataURL("image/png");
 
-      // Step 2: If enhancement level is high (>50), use AI for additional polish
-      if (level > 50) {
+      // Step 2: Only use AI for final polish at very high levels (>75)
+      if (level > 75) {
         toast({
-          title: "Applying AI polish...",
-          description: "Adding final touches with AI",
+          title: "Applying minimal AI polish...",
+          description: "Just smoothing final details",
         });
 
-        const aiPrompt = "Polish this already-enhanced image: reduce any artifacts, smooth out imperfections, add subtle clarity improvements, and make the final result look professional and natural. Keep changes minimal and focused on quality refinement.";
+        const aiPrompt = "Very subtle final polish only: smooth any minor artifacts, blend slight imperfections. Make minimal changes, preserve all the existing quality and enhancements. Only fix obvious flaws.";
 
         const { data, error } = await supabase.functions.invoke("enhance-image", {
           body: {
             image: canvasEnhanced,
-            enhancementLevel: level,
+            enhancementLevel: 30, // AI only contributes 30%
             prompt: aiPrompt,
           },
         });
@@ -181,15 +275,15 @@ const ImageEnhancer = () => {
           setEnhancedImage(data.enhancedImage);
           toast({
             title: "Enhancement complete!",
-            description: "Image enhanced with canvas processing + AI polish",
+            description: "70% canvas algorithms + 30% AI polish",
           });
         }
       } else {
-        // For lower levels, just use canvas processing
+        // For lower levels, just use canvas processing (100% local)
         setEnhancedImage(canvasEnhanced);
         toast({
           title: "Enhancement complete!",
-          description: "Image enhanced with canvas processing",
+          description: "100% client-side processing (instant)",
         });
       }
     } catch (error) {
@@ -272,12 +366,12 @@ const ImageEnhancer = () => {
                   </label>
                   <p className="text-xs text-muted-foreground">
                     {enhancementLevel[0] >= 75
-                      ? "Maximum: Canvas processing + AI polish for pro results"
+                      ? "Maximum: Advanced algorithms (70%) + AI polish (30%)"
                       : enhancementLevel[0] >= 50
-                      ? "High: Canvas enhancements + AI refinement"
+                      ? "High: Advanced canvas processing (100% local, instant)"
                       : enhancementLevel[0] >= 25
-                      ? "Medium: Canvas-based improvements (fast)"
-                      : "Low: Subtle canvas enhancements (instant)"}
+                      ? "Medium: Canvas enhancements (100% local, instant)"
+                      : "Low: Basic improvements (100% local, instant)"}
                   </p>
                   <Slider
                     value={enhancementLevel}
