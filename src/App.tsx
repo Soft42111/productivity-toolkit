@@ -45,6 +45,7 @@ import DrawingPad from "./pages/DrawingPad";
 import GradientGenerator from "./pages/GradientGenerator";
 import ColorPaletteGenerator from "./pages/ColorPaletteGenerator";
 import ImageCompressor from "./pages/ImageCompressor";
+import ImageEnhancer from "./pages/ImageEnhancer";
 import CodeSnippetManager from "./pages/CodeSnippetManager";
 
 const queryClient = new QueryClient();
@@ -95,6 +96,7 @@ const App = () => (
           <Route path="/gradient-generator" element={<GradientGenerator />} />
           <Route path="/color-palette-generator" element={<ColorPaletteGenerator />} />
           <Route path="/image-compressor" element={<ImageCompressor />} />
+          <Route path="/image-enhancer" element={<ImageEnhancer />} />
           <Route path="/code-snippet-manager" element={<CodeSnippetManager />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/verify-email" element={<VerifyEmail />} />

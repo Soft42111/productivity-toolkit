@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Download, Eraser, Trash2, Palette } from "lucide-react";
+import { Download, Eraser, Trash2, Palette, Maximize, Minimize } from "lucide-react";
 import HomeButton from "@/components/HomeButton";
 import ThemeToggle from "@/components/ThemeToggle";
 import Footer from "@/components/Footer";
@@ -14,6 +14,7 @@ const DrawingPad = () => {
   const [color, setColor] = useState("#000000");
   const [brushSize, setBrushSize] = useState([5]);
   const [isEraser, setIsEraser] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const colors = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500"];
 
@@ -123,6 +124,24 @@ const DrawingPad = () => {
     a.click();
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/5">
       <AuthPrompt appName="Drawing Pad" />
@@ -176,6 +195,19 @@ const DrawingPad = () => {
               <Button variant="default" size="sm" onClick={downloadDrawing}>
                 <Download className="h-4 w-4 mr-2" />
                 Download
+              </Button>
+              <Button variant="outline" size="sm" onClick={toggleFullscreen}>
+                {isFullscreen ? (
+                  <>
+                    <Minimize className="h-4 w-4 mr-2" />
+                    Exit Fullscreen
+                  </>
+                ) : (
+                  <>
+                    <Maximize className="h-4 w-4 mr-2" />
+                    Fullscreen
+                  </>
+                )}
               </Button>
             </div>
           </div>
