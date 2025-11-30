@@ -21,6 +21,56 @@ const ImageEnhancer = () => {
   const [isDragging, setIsDragging] = useState(false);
   const { toast } = useToast();
 
+  const applyCanvasEnhancements = (
+    imageData: ImageData,
+    level: number
+  ): ImageData => {
+    const data = imageData.data;
+    const factor = level / 100;
+
+    // Calculate enhancement parameters based on level
+    const brightness = 1 + (factor * 0.3); // Up to 30% brighter
+    const contrast = 1 + (factor * 0.5); // Up to 50% more contrast
+    const saturation = 1 + (factor * 0.4); // Up to 40% more saturated
+
+    for (let i = 0; i < data.length; i += 4) {
+      let r = data[i];
+      let g = data[i + 1];
+      let b = data[i + 2];
+
+      // Apply brightness
+      r *= brightness;
+      g *= brightness;
+      b *= brightness;
+
+      // Apply contrast (centered around 128)
+      r = ((r - 128) * contrast) + 128;
+      g = ((g - 128) * contrast) + 128;
+      b = ((b - 128) * contrast) + 128;
+
+      // Apply saturation
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+      r = gray + (r - gray) * saturation;
+      g = gray + (g - gray) * saturation;
+      b = gray + (b - gray) * saturation;
+
+      // Sharpen (simple unsharp mask approximation)
+      if (factor > 0.5) {
+        const sharpenAmount = (factor - 0.5) * 2;
+        r = r + (r - gray) * sharpenAmount * 0.3;
+        g = g + (g - gray) * sharpenAmount * 0.3;
+        b = b + (b - gray) * sharpenAmount * 0.3;
+      }
+
+      // Clamp values
+      data[i] = Math.max(0, Math.min(255, r));
+      data[i + 1] = Math.max(0, Math.min(255, g));
+      data[i + 2] = Math.max(0, Math.min(255, b));
+    }
+
+    return imageData;
+  };
+
   const processImageFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({
@@ -77,36 +127,69 @@ const ImageEnhancer = () => {
     if (!originalImage) return;
 
     setIsEnhancing(true);
+    
     try {
-      // Create more specific enhancement prompts
-      let prompt = "";
       const level = enhancementLevel[0];
       
-      if (level >= 75) {
-        prompt = "Transform this image to professional quality: dramatically increase sharpness and clarity, enhance colors to be vibrant and rich, perfect the lighting and contrast, remove any noise or blur, make details crisp and clear, and optimize overall image quality to look stunning.";
-      } else if (level >= 50) {
-        prompt = "Enhance this image significantly: improve sharpness and definition, boost color vibrancy and saturation, balance brightness and contrast for better visual appeal, reduce noise, and make the image look clearer and more professional.";
-      } else if (level >= 25) {
-        prompt = "Moderately enhance this image: gently improve sharpness, slightly boost colors and contrast, balance the lighting, and make the image look cleaner and more polished while keeping it natural.";
-      } else {
-        prompt = "Apply subtle enhancements: slightly improve clarity and sharpness, make minor adjustments to brightness and color balance, keep the image looking very natural with minimal changes.";
-      }
-
-      const { data, error } = await supabase.functions.invoke("enhance-image", {
-        body: {
-          image: originalImage,
-          enhancementLevel: level,
-          prompt: prompt,
-        },
+      // Step 1: Apply canvas-based enhancements first
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = originalImage;
       });
 
-      if (error) throw error;
+      // Create canvas for processing
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Could not get canvas context");
 
-      if (data?.enhancedImage) {
-        setEnhancedImage(data.enhancedImage);
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      // Get image data and apply enhancements
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const enhancedData = applyCanvasEnhancements(imageData, level);
+      ctx.putImageData(enhancedData, 0, 0);
+
+      // Get the canvas-enhanced image
+      const canvasEnhanced = canvas.toDataURL("image/png");
+
+      // Step 2: If enhancement level is high (>50), use AI for additional polish
+      if (level > 50) {
         toast({
-          title: "Image enhanced!",
-          description: "Your image has been enhanced successfully",
+          title: "Applying AI polish...",
+          description: "Adding final touches with AI",
+        });
+
+        const aiPrompt = "Polish this already-enhanced image: reduce any artifacts, smooth out imperfections, add subtle clarity improvements, and make the final result look professional and natural. Keep changes minimal and focused on quality refinement.";
+
+        const { data, error } = await supabase.functions.invoke("enhance-image", {
+          body: {
+            image: canvasEnhanced,
+            enhancementLevel: level,
+            prompt: aiPrompt,
+          },
+        });
+
+        if (error) throw error;
+
+        if (data?.enhancedImage) {
+          setEnhancedImage(data.enhancedImage);
+          toast({
+            title: "Enhancement complete!",
+            description: "Image enhanced with canvas processing + AI polish",
+          });
+        }
+      } else {
+        // For lower levels, just use canvas processing
+        setEnhancedImage(canvasEnhanced);
+        toast({
+          title: "Enhancement complete!",
+          description: "Image enhanced with canvas processing",
         });
       }
     } catch (error) {
@@ -189,12 +272,12 @@ const ImageEnhancer = () => {
                   </label>
                   <p className="text-xs text-muted-foreground">
                     {enhancementLevel[0] >= 75
-                      ? "Maximum: Professional quality with dramatic improvements"
+                      ? "Maximum: Canvas processing + AI polish for pro results"
                       : enhancementLevel[0] >= 50
-                      ? "High: Significant enhancements to clarity and color"
+                      ? "High: Canvas enhancements + AI refinement"
                       : enhancementLevel[0] >= 25
-                      ? "Medium: Moderate improvements, natural looking"
-                      : "Low: Subtle enhancements, very natural"}
+                      ? "Medium: Canvas-based improvements (fast)"
+                      : "Low: Subtle canvas enhancements (instant)"}
                   </p>
                   <Slider
                     value={enhancementLevel}
