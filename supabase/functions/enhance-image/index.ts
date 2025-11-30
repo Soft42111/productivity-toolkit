@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { image, enhancementLevel } = await req.json();
+    const { image, enhancementLevel, prompt } = await req.json();
     
     if (!image) {
       return new Response(
@@ -31,17 +31,8 @@ serve(async (req) => {
 
     console.log('Enhancing image with level:', enhancementLevel);
 
-    // Prepare the enhancement prompt based on the level
-    let prompt = "Enhance this image by improving its clarity, colors, and overall quality.";
-    if (enhancementLevel >= 75) {
-      prompt = "Dramatically enhance this image with maximum clarity, vibrant colors, sharp details, and professional quality improvements.";
-    } else if (enhancementLevel >= 50) {
-      prompt = "Moderately enhance this image by improving brightness, contrast, color balance, and sharpness.";
-    } else if (enhancementLevel >= 25) {
-      prompt = "Gently enhance this image with subtle improvements to lighting and color balance.";
-    } else {
-      prompt = "Apply minimal enhancements to this image, keeping it as natural as possible while slightly improving quality.";
-    }
+    // Use the custom prompt if provided, otherwise use default
+    const enhancementPrompt = prompt || "Enhance this image by improving its clarity, colors, and overall quality.";
 
     // Use Lovable AI to enhance the image
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -58,7 +49,7 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: prompt
+                text: enhancementPrompt
               },
               {
                 type: "image_url",
